@@ -1,0 +1,43 @@
+# EventHive Tool: Sponsor Deliverables Tracker
+
+## Architecture
+- Single self-contained HTML file (`tool.html`) — all CSS and JS inline
+- No external dependencies, no build step, no framework
+- Must work when opened directly in a browser with no server
+- Under 500KB total file size
+
+## Config System
+- `EVENTHIVE_CONFIG = {}` object in a script tag — replaced at serve time on EventHive
+- `{{config.propertyName}}` Mustache placeholders in HTML — replaced at serve time
+- NEVER use `{{config.x}}` inside `<script>` tags — only in HTML attributes/text
+- Config schema defined in `manifest.json` — keep both in sync
+
+## Data Storage
+- localStorage key: `eventhive_event_{eventSlug}_sponsors`
+- Always check if data exists before rendering (fresh state = no data)
+- Provide sample/demo data mode for first-time users
+
+## EventHive Integration
+- Reads from EventHive's tool data API when `EVENTHIVE_CONFIG.__hosted === true`
+- Falls back to localStorage when not hosted
+- `EVENTHIVE_CONFIG.__apiBase` provides the API base URL in hosted mode
+- Always implement both storage paths for maximum compatibility
+
+## Coding Standards
+- Vanilla JS only — no React, no Vue, no jQuery
+- Tailwind-style utility classes are fine if defined inline in `<style>`
+- Use semantic HTML where possible
+- Mobile-responsive (test at 375px width minimum)
+- All user-visible strings in English (i18n is a future concern)
+- Colours from `EVENTHIVE_CONFIG.primaryColor` for theming — never hardcode brand colours
+
+## Testing
+- Open `tool.html` in browser, verify all interactions work
+- Test with localStorage cleared (fresh state — empty screen should be graceful)
+- Test with sample data populated
+- Test at mobile width (375px) and desktop (1200px)
+
+## File Size Budget
+- Target under 400KB
+- Inline all CSS and JS — no external requests except optional CDN for icons
+- If adding a library, consider if vanilla JS can do the same job

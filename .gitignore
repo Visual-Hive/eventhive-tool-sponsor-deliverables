@@ -1,0 +1,23 @@
+# Data
+data/
+standalone/data/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (standalone/ only)
+node_modules/
+standalone/node_modules/
+*.log

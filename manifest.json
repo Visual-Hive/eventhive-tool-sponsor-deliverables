@@ -1,0 +1,132 @@
+{
+    "slug": "sponsor-deliverables",
+    "name": "Sponsor Deliverables Tracker",
+    "version": "1.0.0",
+    "description": "Full sponsor lifecycle management: profile CRUD with tier colour coding, package/tier templates with auto-populated deliverables, promised-vs-delivered matrix with RAG status, payment milestone tracking, pipeline Kanban, ROI dashboard, and export to CSV/PDF with Budget Tracker bridge.",
+    "category": "commercial",
+    "difficulty": "intermediate",
+    "requires_backend": false,
+    "is_published": true,
+    "author": "Visual Hive",
+    "source_repo": "https://github.com/Visual-Hive/eventhive-tool-sponsor-deliverables",
+    "tool_file": "tool.html",
+    "config_schema": {
+        "sections": [
+            {
+                "id": "branding",
+                "title": "Branding",
+                "description": "Customise to match your event brand.",
+                "fields": [
+                    {
+                        "id": "companyName",
+                        "type": "text",
+                        "label": "Company / Event Name",
+                        "placeholder": "e.g. TechSummit Events",
+                        "required": true,
+                        "default": "My Event"
+                    },
+                    {
+                        "id": "primaryColor",
+                        "type": "color",
+                        "label": "Primary Brand Colour",
+                        "default": "#7C3AED"
+                    }
+                ]
+            },
+            {
+                "id": "currency",
+                "title": "Currency",
+                "description": "Configure the currency used across sponsor values.",
+                "fields": [
+                    {
+                        "id": "currency",
+                        "type": "text",
+                        "label": "Currency Code (ISO 4217)",
+                        "placeholder": "GBP",
+                        "default": "GBP"
+                    },
+                    {
+                        "id": "currencySymbol",
+                        "type": "text",
+                        "label": "Currency Symbol",
+                        "placeholder": "£",
+                        "default": "£"
+                    },
+                    {
+                        "id": "currencyLocale",
+                        "type": "text",
+                        "label": "Currency Locale",
+                        "placeholder": "en-GB",
+                        "default": "en-GB"
+                    }
+                ]
+            },
+            {
+                "id": "event",
+                "title": "Event Details",
+                "description": "Set your event details for context in exports.",
+                "fields": [
+                    {
+                        "id": "eventName",
+                        "type": "text",
+                        "label": "Event Name",
+                        "placeholder": "e.g. TechSummit 2026",
+                        "default": "My Event"
+                    },
+                    {
+                        "id": "eventDate",
+                        "type": "text",
+                        "label": "Event Date",
+                        "placeholder": "e.g. 12–13 June 2026",
+                        "default": ""
+                    },
+                    {
+                        "id": "sponsorTarget",
+                        "type": "number",
+                        "label": "Total Sponsor Revenue Target",
+                        "description": "Your target total sponsorship revenue for this event.",
+                        "default": 100000,
+                        "min": 0
+                    }
+                ]
+            },
+            {
+                "id": "tiers",
+                "title": "Sponsor Tiers",
+                "description": "Define the tier names available for sponsors.",
+                "fields": [
+                    {
+                        "id": "tierNames",
+                        "type": "json",
+                        "label": "Tier Names (in descending value order)",
+                        "description": "Names for your sponsorship tiers.",
+                        "default": [
+                            "Headline",
+                            "Gold",
+                            "Silver",
+                            "Bronze",
+                            "Media Partner"
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "default_config": {
+        "companyName": "My Event",
+        "primaryColor": "#7C3AED",
+        "currency": "GBP",
+        "currencySymbol": "£",
+        "currencyLocale": "en-GB",
+        "eventName": "My Event",
+        "eventDate": "",
+        "sponsorTarget": 100000,
+        "tierNames": [
+            "Headline",
+            "Gold",
+            "Silver",
+            "Bronze",
+            "Media Partner"
+        ]
+    }
+}

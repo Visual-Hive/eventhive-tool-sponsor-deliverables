@@ -1,0 +1,2092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sponsor Deliverables Tracker</title>
+<style>
+  :root {
+    --primary: #7C3AED;
+    --primary-dark: #6D28D9;
+    --primary-light: #F5F3FF;
+    --surface: #FFFFFF;
+    --surface-2: #F8FAFC;
+    --surface-3: #F1F5F9;
+    --border: #E2E8F0;
+    --text: #0F172A;
+    --text-2: #475569;
+    --text-3: #94A3B8;
+    --success: #10B981;
+    --success-bg: #ECFDF5;
+    --warning: #F59E0B;
+    --warning-bg: #FFFBEB;
+    --danger: #EF4444;
+    --danger-bg: #FEF2F2;
+    --info: #3B82F6;
+    --info-bg: #EFF6FF;
+    --radius: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,.12);
+    /* Tier colours */
+    --tier-headline: #7C3AED;
+    --tier-gold: #D97706;
+    --tier-silver: #64748B;
+    --tier-bronze: #B45309;
+    --tier-media: #0891B2;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;color:var(--text);background:var(--surface-2);line-height:1.5;min-width:320px}
+  h1{font-size:1.5rem;font-weight:700}
+  h2{font-size:1.125rem;font-weight:600}
+  h3{font-size:1rem;font-weight:600}
+
+  /* ── Layout ── */
+  .app-header{background:var(--primary);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+  .app-header h1{font-size:1.1rem;font-weight:700;white-space:nowrap}
+  .app-header .subtitle{font-size:.75rem;opacity:.8;display:none}
+  @media(min-width:480px){.app-header .subtitle{display:block}}
+  .header-actions{margin-left:auto;display:flex;gap:8px}
+
+  .tab-bar{background:var(--surface);border-bottom:2px solid var(--border);display:flex;overflow-x:auto;gap:0;padding:0 4px;scrollbar-width:none;position:sticky;top:52px;z-index:90}
+  .tab-bar::-webkit-scrollbar{display:none}
+  .tab-btn{padding:10px 14px;border:none;background:none;cursor:pointer;font-size:.8rem;font-weight:500;color:var(--text-2);white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;display:flex;align-items:center;gap:6px}
+  .tab-btn.active{color:var(--primary);border-bottom-color:var(--primary)}
+  .tab-btn:hover:not(.active){color:var(--text);background:var(--surface-3)}
+  .tab-btn .badge{background:var(--primary);color:#fff;border-radius:10px;padding:1px 6px;font-size:.7rem;font-weight:700}
+
+  .view{display:none;padding:16px;animation:fadeIn .15s}
+  .view.active{display:block}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+  /* ── Toolbar ── */
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:center}
+  .toolbar-left{display:flex;gap:8px;flex:1;flex-wrap:wrap}
+  .search-box{padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:.85rem;width:200px;outline:none;transition:.15s}
+  .search-box:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(124,58,237,.1)}
+  select.filter-select{padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:.85rem;background:var(--surface);outline:none;cursor:pointer}
+
+  /* ── Buttons ── */
+  .btn{padding:7px 14px;border-radius:var(--radius);border:none;cursor:pointer;font-size:.85rem;font-weight:500;transition:all .15s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;text-decoration:none}
+  .btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark)}
+  .btn-secondary{background:var(--surface);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{background:var(--surface-3)}
+  .btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{background:#DC2626}
+  .btn-success{background:var(--success);color:#fff}.btn-success:hover{background:#059669}
+  .btn-ghost{background:none;color:var(--text-2);border:none}.btn-ghost:hover{background:var(--surface-3);color:var(--text)}
+  .btn-sm{padding:4px 10px;font-size:.78rem}
+  .btn-icon{padding:6px;border-radius:var(--radius)}
+
+  /* ── Cards ── */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+  .sponsor-card{padding:0;overflow:hidden;transition:box-shadow .15s}
+  .sponsor-card:hover{box-shadow:var(--shadow-lg)}
+  .sponsor-card-stripe{height:4px}
+  .sponsor-card-body{padding:14px 16px}
+  .sponsor-card-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px}
+  .sponsor-logo{width:48px;height:48px;border-radius:var(--radius);background:var(--surface-3);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;flex-shrink:0;overflow:hidden;border:1px solid var(--border)}
+  .sponsor-logo img{width:100%;height:100%;object-fit:contain;padding:4px}
+  .sponsor-card-info{flex:1;min-width:0}
+  .sponsor-card-info h3{font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sponsor-card-info .contact{font-size:.78rem;color:var(--text-2)}
+  .sponsor-card-actions{display:flex;gap:4px}
+  .card-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+  .card-meta-item{font-size:.75rem;color:var(--text-2);display:flex;align-items:center;gap:4px}
+  .card-meta-item strong{color:var(--text)}
+
+  /* Tier badges */
+  .tier-badge{padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+  /* Status badges */
+  .status-badge{padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+  .s-prospect{background:#F1F5F9;color:#64748B}
+  .s-pitched{background:#DBEAFE;color:#1D4ED8}
+  .s-negotiating{background:#FEF3C7;color:#92400E}
+  .s-confirmed{background:var(--success-bg);color:var(--success)}
+  .s-fulfilled{background:#F0FDF4;color:#15803D}
+  .s-renewed{background:#EDE9FE;color:#6D28D9}
+  .s-lost{background:var(--danger-bg);color:var(--danger)}
+
+  /* RAG badges */
+  .rag-green{background:var(--success-bg);color:var(--success)}
+  .rag-amber{background:var(--warning-bg);color:#92400E}
+  .rag-red{background:var(--danger-bg);color:var(--danger)}
+  .rag-grey{background:var(--surface-3);color:var(--text-2)}
+
+  /* Payment status */
+  .pay-paid{background:var(--success-bg);color:var(--success)}
+  .pay-overdue{background:var(--danger-bg);color:var(--danger)}
+  .pay-due-soon{background:var(--warning-bg);color:#92400E}
+  .pay-not-due{background:var(--surface-3);color:var(--text-2)}
+  .pay-invoiced{background:var(--info-bg);color:var(--info)}
+
+  /* ── Stats ── */
+  .stats-bar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+  .stat-chip{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;gap:10px;min-width:120px}
+  .stat-chip .sc-num{font-size:1.3rem;font-weight:700;color:var(--primary)}
+  .stat-chip .sc-lbl{font-size:.73rem;color:var(--text-2);line-height:1.3}
+
+  /* ── Table ── */
+  .table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+  table{width:100%;border-collapse:collapse;background:var(--surface)}
+  th{padding:10px 12px;text-align:left;font-size:.78rem;font-weight:600;color:var(--text-2);background:var(--surface-2);border-bottom:1px solid var(--border);white-space:nowrap}
+  td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:.85rem;vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:var(--surface-2)}
+
+  /* ── Deliverables Matrix ── */
+  .matrix-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface)}
+  .matrix-table{border-collapse:collapse;width:100%;min-width:800px}
+  .matrix-table th{padding:8px 10px;background:var(--surface-2);border-bottom:2px solid var(--border);border-right:1px solid var(--border);font-size:.75rem;font-weight:600;white-space:nowrap;text-align:center}
+  .matrix-table th.sponsor-col{text-align:left;min-width:180px;position:sticky;left:0;background:var(--surface-2);z-index:2}
+  .matrix-table td{border-bottom:1px solid var(--border);border-right:1px solid var(--border);padding:6px 8px;vertical-align:middle}
+  .matrix-table td.sponsor-cell{position:sticky;left:0;background:var(--surface);z-index:1;border-right:2px solid var(--border)}
+  .matrix-table td.sponsor-cell:hover{background:var(--surface-2)}
+  .matrix-cell{text-align:center;cursor:pointer}
+  .cell-inner{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px;border-radius:4px;min-height:44px;justify-content:center;transition:background .1s}
+  .cell-inner:hover{background:var(--surface-3)}
+  .cell-inner.fulfilled{background:var(--success-bg)}
+  .cell-inner.partial{background:var(--warning-bg)}
+  .cell-inner.not-started{background:var(--surface-2)}
+  .cell-inner.overdue{background:var(--danger-bg)}
+  .cell-qty{font-size:.78rem;font-weight:700}
+  .cell-label{font-size:.65rem;color:var(--text-2)}
+  .cell-n-a{color:var(--text-3);font-size:.8rem}
+  .cat-header{font-size:.7rem;font-weight:600;padding:4px 10px;background:var(--surface-3);color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);border-right:1px solid var(--border)}
+
+  /* ── Kanban ── */
+  .kanban{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px}
+  .kanban-col{flex:0 0 180px;background:var(--surface-3);border-radius:var(--radius);overflow:hidden}
+  @media(min-width:1100px){.kanban-col{flex:1;min-width:140px}}
+  .kanban-header{padding:10px 12px;font-size:.8rem;font-weight:700;border-bottom:2px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .kanban-value{font-size:.7rem;color:var(--text-2);margin-top:2px;font-weight:400}
+  .kanban-count{background:var(--surface);border-radius:10px;padding:1px 7px;font-size:.72rem}
+  .kanban-body{padding:8px;min-height:100px;display:flex;flex-direction:column;gap:6px}
+  .kanban-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 12px;cursor:grab;transition:box-shadow .15s;user-select:none;border-left:3px solid transparent}
+  .kanban-card:hover{box-shadow:var(--shadow-lg)}
+  .kanban-card.dragging{opacity:.5}
+  .kanban-card h4{font-size:.82rem;font-weight:600;margin-bottom:2px}
+  .kanban-card .kc-tier{font-size:.72rem;font-weight:600}
+  .kanban-card .kc-value{font-size:.72rem;color:var(--text-2);margin-top:2px}
+  .kanban-col.drag-over .kanban-body{background:var(--primary-light)}
+
+  /* ── Dashboard / ROI ── */
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px}
+  .kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+  .kpi-card .kpi-num{font-size:1.75rem;font-weight:700;line-height:1.1;margin-bottom:4px}
+  .kpi-card .kpi-lbl{font-size:.78rem;color:var(--text-2)}
+  .kpi-card .kpi-sub{font-size:.75rem;color:var(--text-3);margin-top:2px}
+  .progress-bar{height:8px;background:var(--surface-3);border-radius:4px;overflow:hidden;margin-top:8px}
+  .progress-fill{height:100%;border-radius:4px;transition:width .4s}
+  .chart-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+  @media(max-width:700px){.chart-row{grid-template-columns:1fr}}
+  .chart-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+  .chart-box h3{font-size:.9rem;margin-bottom:12px}
+  .bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .bar-label{font-size:.78rem;width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+  .bar-track{flex:1;background:var(--surface-3);border-radius:4px;height:16px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:4px;transition:width .4s}
+  .bar-val{font-size:.75rem;color:var(--text-2);width:70px;text-align:right;flex-shrink:0}
+  .risk-list{display:flex;flex-direction:column;gap:6px}
+  .risk-item{background:var(--danger-bg);border:1px solid var(--danger);border-radius:6px;padding:8px 12px;font-size:.82rem}
+  .risk-item .risk-company{font-weight:600}
+  .risk-item .risk-detail{font-size:.75rem;color:var(--danger)}
+
+  /* ── Packages ── */
+  .package-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+  .package-card{padding:0;overflow:hidden}
+  .package-card-header{padding:12px 16px;color:#fff;display:flex;align-items:center;justify-content:space-between}
+  .package-card-header h3{font-size:.95rem;font-weight:700}
+  .package-deliverable-list{padding:12px 16px}
+  .pkg-del-item{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:.82rem}
+  .pkg-del-item:last-child{border-bottom:none}
+  .pkg-del-qty{background:var(--surface-3);border-radius:12px;padding:1px 7px;font-size:.72rem;font-weight:700;flex-shrink:0}
+  .cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+  /* ── Modal ── */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+  .modal-overlay.open{display:flex}
+  .modal{background:var(--surface);border-radius:12px;width:100%;max-width:560px;box-shadow:var(--shadow-lg);animation:slideUp .2s}
+  .modal-lg{max-width:740px}
+  .modal-xl{max-width:920px}
+  @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:none;opacity:1}}
+  .modal-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .modal-header h2{font-size:1rem}
+  .modal-body{padding:20px;max-height:72vh;overflow-y:auto}
+  .modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+
+  /* ── Forms ── */
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:480px){.form-grid{grid-template-columns:1fr}}
+  .form-group{display:flex;flex-direction:column;gap:4px}
+  .form-group.full{grid-column:1/-1}
+  label.fl{font-size:.8rem;font-weight:600;color:var(--text-2)}
+  .form-control{padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:.85rem;background:var(--surface);outline:none;transition:.15s;font-family:inherit;width:100%}
+  .form-control:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(124,58,237,.1)}
+  textarea.form-control{resize:vertical;min-height:72px}
+
+  /* ── Deliverable edit row ── */
+  .del-edit-row{display:grid;grid-template-columns:1fr 80px 80px 120px auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)}
+  .del-edit-row:last-child{border-bottom:none}
+  @media(max-width:600px){.del-edit-row{grid-template-columns:1fr 60px 60px;gap:4px}}
+
+  /* ── Export cards ── */
+  .export-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+  .export-card{padding:20px}
+  .export-card h3{margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .export-card p{font-size:.82rem;color:var(--text-2);margin-bottom:14px}
+  .export-icon{font-size:1.3rem}
+
+  /* ── Empty states ── */
+  .empty{text-align:center;padding:48px 20px;color:var(--text-2)}
+  .empty .empty-icon{font-size:3rem;margin-bottom:12px}
+  .empty h3{font-size:1rem;margin-bottom:6px;color:var(--text)}
+  .empty p{font-size:.85rem;margin-bottom:16px}
+
+  /* ── Misc ── */
+  .divider{height:1px;background:var(--border);margin:16px 0}
+  .flex{display:flex;align-items:center}
+  .flex-1{flex:1}
+  .gap-2{gap:8px}
+  .gap-3{gap:12px}
+  .mt-2{margin-top:8px}
+  .mt-3{margin-top:12px}
+  .mb-2{margin-bottom:8px}
+  .mb-3{margin-bottom:12px}
+  .text-sm{font-size:.82rem}
+  .text-xs{font-size:.72rem}
+  .text-muted{color:var(--text-2)}
+  .text-danger{color:var(--danger)}
+  .text-success{color:var(--success)}
+  .text-warning{color:var(--warning)}
+  .font-bold{font-weight:700}
+  .view-header{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+  .view-header h2{font-size:1.1rem;flex:1}
+  .section-title{font-size:.85rem;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin:16px 0 8px}
+
+  @media print{
+    .app-header,.tab-bar,.toolbar,.modal-overlay,.btn,.header-actions{display:none!important}
+    .view{display:block!important;padding:0}
+    body{background:#fff}
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ APP HEADER ═══ -->
+<header class="app-header">
+  <div>
+    <h1 id="app-title">🤝 Sponsor Deliverables</h1>
+    <div class="subtitle" id="app-subtitle">Loading…</div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-secondary btn-sm" onclick="loadSampleData()">📋 Sample Data</button>
+    <button class="btn btn-secondary btn-sm" onclick="exportAllJSON()">⬇ Backup</button>
+  </div>
+</header>
+
+<!-- ═══ TAB BAR ═══ -->
+<nav class="tab-bar" id="tab-bar">
+  <button class="tab-btn active" onclick="switchView('dashboard')" id="tab-dashboard">📊 Dashboard</button>
+  <button class="tab-btn" onclick="switchView('sponsors')" id="tab-sponsors">🤝 Sponsors <span class="badge" id="badge-sponsors">0</span></button>
+  <button class="tab-btn" onclick="switchView('deliverables')" id="tab-deliverables">📋 Deliverables</button>
+  <button class="tab-btn" onclick="switchView('payments')" id="tab-payments">💳 Payments</button>
+  <button class="tab-btn" onclick="switchView('pipeline')" id="tab-pipeline">🔄 Pipeline</button>
+  <button class="tab-btn" onclick="switchView('packages')" id="tab-packages">📦 Packages</button>
+  <button class="tab-btn" onclick="switchView('export')" id="tab-export">⬆ Export</button>
+</nav>
+
+<!-- ════════════════════════════════════════════
+     VIEW: DASHBOARD (ROI)
+════════════════════════════════════════════ -->
+<section class="view active" id="view-dashboard">
+  <div class="kpi-grid" id="kpi-grid"></div>
+  <div class="chart-row">
+    <div class="chart-box">
+      <h3>💰 Revenue by Tier</h3>
+      <div id="chart-revenue-tier"></div>
+    </div>
+    <div class="chart-box">
+      <h3>📋 Deliverables Fulfilment by Sponsor</h3>
+      <div id="chart-fulfilment"></div>
+    </div>
+  </div>
+  <div class="chart-row">
+    <div class="chart-box">
+      <h3>💳 Payment Collection Status</h3>
+      <div id="chart-payments"></div>
+    </div>
+    <div class="chart-box">
+      <h3>⚠ Deliverables at Risk</h3>
+      <div id="risk-list-container"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     VIEW: SPONSORS
+════════════════════════════════════════════ -->
+<section class="view" id="view-sponsors">
+  <div class="stats-bar" id="sponsors-stats"></div>
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <input class="search-box" type="search" placeholder="Search sponsors…" oninput="renderSponsors()" id="sponsor-search">
+      <select class="filter-select" onchange="renderSponsors()" id="sponsor-tier-filter">
+        <option value="">All tiers</option>
+      </select>
+      <select class="filter-select" onchange="renderSponsors()" id="sponsor-status-filter">
+        <option value="">All statuses</option>
+        <option value="prospect">Prospect</option>
+        <option value="pitched">Pitched</option>
+        <option value="negotiating">Negotiating</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="fulfilled">Fulfilled</option>
+        <option value="renewed">Renewed</option>
+        <option value="lost">Lost</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="openSponsorModal()">+ Add Sponsor</button>
+  </div>
+  <div id="sponsors-container"></div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     VIEW: DELIVERABLES MATRIX
+════════════════════════════════════════════ -->
+<section class="view" id="view-deliverables">
+  <div class="view-header">
+    <h2>Deliverables Matrix</h2>
+    <div class="flex gap-2">
+      <select class="filter-select" id="matrix-tier-filter" onchange="renderMatrix()">
+        <option value="">All tiers</option>
+      </select>
+      <select class="filter-select" id="matrix-cat-filter" onchange="renderMatrix()">
+        <option value="">All categories</option>
+        <option value="branding">Branding</option>
+        <option value="digital">Digital</option>
+        <option value="physical">Physical</option>
+        <option value="hospitality">Hospitality</option>
+        <option value="speaking">Speaking</option>
+        <option value="data">Data</option>
+      </select>
+      <select class="filter-select" id="matrix-status-filter" onchange="renderMatrix()">
+        <option value="">All</option>
+        <option value="outstanding">Outstanding only</option>
+      </select>
+    </div>
+  </div>
+  <p class="text-sm text-muted mb-3">Click any cell to update the delivered quantity for that sponsor/deliverable.</p>
+  <div id="matrix-container"></div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     VIEW: PAYMENTS
+════════════════════════════════════════════ -->
+<section class="view" id="view-payments">
+  <div class="stats-bar" id="payments-stats"></div>
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <select class="filter-select" id="payment-sponsor-filter" onchange="renderPayments()">
+        <option value="">All sponsors</option>
+      </select>
+      <select class="filter-select" id="payment-status-filter" onchange="renderPayments()">
+        <option value="">All statuses</option>
+        <option value="overdue">Overdue</option>
+        <option value="due-soon">Due soon</option>
+        <option value="invoiced">Invoiced</option>
+        <option value="paid">Paid</option>
+        <option value="not-due">Not yet due</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="openPaymentModal()">+ Add Milestone</button>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Sponsor</th>
+          <th>Milestone</th>
+          <th>Amount</th>
+          <th>Due Date</th>
+          <th>Invoice Ref</th>
+          <th>Status</th>
+          <th>Paid Date</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="payments-tbody"></tbody>
+    </table>
+  </div>
+  <div class="empty" id="payments-empty" style="display:none">
+    <div class="empty-icon">💳</div>
+    <h3>No payment milestones yet</h3>
+    <p>Add payment milestones to track invoicing and collection</p>
+    <button class="btn btn-primary" onclick="openPaymentModal()">+ Add Milestone</button>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     VIEW: PIPELINE (KANBAN)
+════════════════════════════════════════════ -->
+<section class="view" id="view-pipeline">
+  <div class="view-header">
+    <h2>Sponsor Pipeline</h2>
+    <div class="text-sm text-muted">Drag cards to update sponsor status</div>
+  </div>
+  <div class="kanban" id="kanban-board"></div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     VIEW: PACKAGES
+════════════════════════════════════════════ -->
+<section class="view" id="view-packages">
+  <div class="view-header">
+    <h2>Package / Tier Templates</h2>
+    <button class="btn btn-primary btn-sm" onclick="openPackageModal()">+ Add Package</button>
+  </div>
+  <p class="text-sm text-muted mb-3">Define deliverables per tier. When you assign a tier to a new sponsor, their deliverables are auto-populated from these templates.</p>
+  <div class="package-grid" id="packages-container"></div>
+  <div class="empty" id="packages-empty" style="display:none">
+    <div class="empty-icon">📦</div>
+    <h3>No packages defined</h3>
+    <p>Define tier templates to auto-populate sponsor deliverables</p>
+    <button class="btn btn-primary" onclick="openPackageModal()">+ Add Package</button>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     VIEW: EXPORT
+════════════════════════════════════════════ -->
+<section class="view" id="view-export">
+  <div class="view-header"><h2>Export & Integrations</h2></div>
+  <div class="export-grid">
+    <div class="card export-card">
+      <h3><span class="export-icon">🖨</span> Sponsor Summary PDF</h3>
+      <p>Print-ready sponsor report showing all confirmed sponsors, their tiers, and contract values.</p>
+      <button class="btn btn-primary" onclick="printSponsorReport()">🖨 Print / Save PDF</button>
+    </div>
+    <div class="card export-card">
+      <h3><span class="export-icon">📊</span> Deliverables CSV</h3>
+      <p>Export the full deliverables matrix as a CSV file for sharing or further analysis.</p>
+      <button class="btn btn-secondary" onclick="exportDeliverablesCSV()">⬇ Download CSV</button>
+    </div>
+    <div class="card export-card">
+      <h3><span class="export-icon">📊</span> Sponsors CSV</h3>
+      <p>Export all sponsor profiles with contact details, tier, and contract values.</p>
+      <button class="btn btn-secondary" onclick="exportSponsorsCSV()">⬇ Download CSV</button>
+    </div>
+    <div class="card export-card">
+      <h3><span class="export-icon">💰</span> Push to Budget Tracker</h3>
+      <p>Write all confirmed sponsor revenue as income line items to the Budget Tracker tool.</p>
+      <button class="btn btn-success" onclick="pushToBudgetTracker()">▶ Push Revenue to Budget</button>
+      <div id="budget-bridge-status" class="mt-2 text-sm text-muted"></div>
+    </div>
+    <div class="card export-card">
+      <h3><span class="export-icon">📋</span> Post-Event Report Bridge</h3>
+      <p>Export sponsor fulfilment and ROI metrics to the Post-Event Report tool's data store.</p>
+      <button class="btn btn-secondary" onclick="pushToPostEventReport()">▶ Push to Post-Event Report</button>
+      <div id="per-bridge-status" class="mt-2 text-sm text-muted"></div>
+    </div>
+    <div class="card export-card">
+      <h3><span class="export-icon">📦</span> Full Backup</h3>
+      <p>Export all sponsor data as JSON for backup or migration.</p>
+      <button class="btn btn-secondary" onclick="exportAllJSON()">⬇ Export JSON</button>
+      <div class="mt-2">
+        <label class="fl">Import JSON backup:</label>
+        <input type="file" accept=".json" onchange="importJSON(event)" class="form-control mt-2" style="font-size:.78rem">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Sponsor Modal -->
+<div class="modal-overlay" id="sponsor-modal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h2 id="sponsor-modal-title">Add Sponsor</h2>
+      <button class="btn btn-ghost btn-icon" onclick="closeModal('sponsor-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label class="fl" for="sp-company">Company Name *</label>
+          <input class="form-control" id="sp-company" placeholder="e.g. Acme Corporation">
+        </div>
+        <div class="form-group">
+          <label class="fl" for="sp-tier">Tier / Package</label>
+          <select class="form-control" id="sp-tier" onchange="onTierChange()"></select>
+        </div>
+        <div class="form-group">
+          <label class="fl" for="sp-pipeline">Pipeline Status</label>
+          <select class="form-control" id="sp-pipeline">
+            <option value="prospect">Prospect</option>
+            <option value="pitched">Pitched</option>
+            <option value="negotiating">Negotiating</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="fulfilled">Fulfilled</option>
+            <option value="renewed">Renewed</option>
+            <option value="lost">Lost</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="fl" for="sp-value">Contract Value</label>
+          <input class="form-control" id="sp-value" type="number" placeholder="e.g. 25000" min="0">
+        </div>
+        <div class="form-group">
+          <label class="fl" for="sp-logo">Logo URL</label>
+          <input class="form-control" id="sp-logo" placeholder="https://…">
+        </div>
+        <div class="form-group">
+          <label class="fl" for="sp-contact-name">Contact Name</label>
+          <input class="form-control" id="sp-contact-name" placeholder="e.g. Jane Smith">
+        </div>
+        <div class="form-group">
+          <label class="fl" for="sp-contact-email">Contact Email</label>
+          <input class="form-control" id="sp-contact-email" type="email" placeholder="jane@company.com">
+        </div>
+        <div class="form-group">
+          <label class="fl" for="sp-contact-phone">Contact Phone</label>
+          <input class="form-control" id="sp-contact-phone" placeholder="+44 7000 000000">
+        </div>
+        <div class="form-group full">
+          <label class="fl" for="sp-notes">Notes</label>
+          <textarea class="form-control" id="sp-notes" rows="2" placeholder="Internal notes…"></textarea>
+        </div>
+        <div class="form-group full" id="sp-tier-deliverables-preview" style="display:none">
+          <label class="fl">Deliverables (from tier template)</label>
+          <div id="tier-del-preview" style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:10px;font-size:.82rem"></div>
+          <p class="text-xs text-muted mt-2">These will be auto-created when you save. You can edit them afterwards in the Deliverables view.</p>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('sponsor-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSponsor()">Save Sponsor</button>
+    </div>
+  </div>
+</div>
+
+<!-- Deliverable Cell Edit Modal -->
+<div class="modal-overlay" id="cell-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="cell-modal-title">Update Deliverable</h2>
+      <button class="btn btn-ghost btn-icon" onclick="closeModal('cell-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="fl">Promised Quantity</label>
+          <input class="form-control" id="cell-promised" type="number" min="0">
+        </div>
+        <div class="form-group">
+          <label class="fl">Delivered Quantity</label>
+          <input class="form-control" id="cell-delivered" type="number" min="0">
+        </div>
+        <div class="form-group">
+          <label class="fl">Due Date</label>
+          <input class="form-control" id="cell-due-date" type="date">
+        </div>
+        <div class="form-group">
+          <label class="fl">RAG Status</label>
+          <select class="form-control" id="cell-rag">
+            <option value="auto">Auto (based on qty)</option>
+            <option value="green">Green — On track</option>
+            <option value="amber">Amber — At risk</option>
+            <option value="red">Red — Behind</option>
+            <option value="na">N/A — Not applicable</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="fl">Notes</label>
+          <textarea class="form-control" id="cell-notes" rows="2" placeholder="Notes on delivery status…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('cell-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCellEdit()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal-overlay" id="payment-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="payment-modal-title">Add Payment Milestone</h2>
+      <button class="btn btn-ghost btn-icon" onclick="closeModal('payment-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label class="fl">Sponsor *</label>
+          <select class="form-control" id="pay-sponsor"></select>
+        </div>
+        <div class="form-group">
+          <label class="fl">Milestone Name *</label>
+          <select class="form-control" id="pay-milestone">
+            <option value="deposit">Deposit</option>
+            <option value="interim">Interim Payment</option>
+            <option value="balance">Balance</option>
+            <option value="final">Final Payment</option>
+            <option value="custom">Custom…</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="fl">Custom Name</label>
+          <input class="form-control" id="pay-custom-name" placeholder="e.g. Stage 2 Payment" style="display:none">
+        </div>
+        <div class="form-group">
+          <label class="fl">Amount *</label>
+          <input class="form-control" id="pay-amount" type="number" min="0" placeholder="e.g. 5000">
+        </div>
+        <div class="form-group">
+          <label class="fl">Due Date *</label>
+          <input class="form-control" id="pay-due-date" type="date">
+        </div>
+        <div class="form-group">
+          <label class="fl">Invoice Reference</label>
+          <input class="form-control" id="pay-invoice-ref" placeholder="e.g. INV-2026-001">
+        </div>
+        <div class="form-group">
+          <label class="fl">Paid Date (if paid)</label>
+          <input class="form-control" id="pay-paid-date" type="date">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('payment-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="savePayment()">Save Milestone</button>
+    </div>
+  </div>
+</div>
+
+<!-- Package Modal -->
+<div class="modal-overlay" id="package-modal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h2 id="package-modal-title">Add Package</h2>
+      <button class="btn btn-ghost btn-icon" onclick="closeModal('package-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="fl">Tier Name *</label>
+          <select class="form-control" id="pkg-tier">
+            <option value="">— select —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="fl">Package Colour</label>
+          <input class="form-control" id="pkg-color" type="color" value="#7C3AED">
+        </div>
+        <div class="form-group">
+          <label class="fl">Typical Value</label>
+          <input class="form-control" id="pkg-value" type="number" min="0" placeholder="e.g. 25000">
+        </div>
+        <div class="form-group">
+          <label class="fl">Max Sponsors at This Tier</label>
+          <input class="form-control" id="pkg-max" type="number" min="1" placeholder="e.g. 3">
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <h3 style="font-size:.9rem">Deliverables</h3>
+        <button class="btn btn-secondary btn-sm" onclick="addDeliverableRow()">+ Add Deliverable</button>
+      </div>
+      <div id="pkg-deliverables-list"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('package-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="savePackage()">Save Package</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sponsor deliverables edit modal -->
+<div class="modal-overlay" id="sponsor-del-modal">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <h2 id="sponsor-del-title">Manage Deliverables</h2>
+      <button class="btn btn-ghost btn-icon" onclick="closeModal('sponsor-del-modal')">✕</button>
+    </div>
+    <div class="modal-body" id="sponsor-del-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('sponsor-del-modal')">Close</button>
+      <button class="btn btn-primary" onclick="addSponsorDeliverable()">+ Add Deliverable</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONFIG & CONSTANTS
+// ═══════════════════════════════════════════════════════
+const CFG = (typeof EVENTHIVE_CONFIG !== 'undefined') ? EVENTHIVE_CONFIG : {};
+const PRIMARY = CFG.primaryColor || '#7C3AED';
+const COMPANY = CFG.companyName || 'My Event';
+const EVENT_NAME = CFG.eventName || COMPANY;
+const EVENT_DATE = CFG.eventDate || '';
+const CURRENCY_CODE = CFG.currency || 'GBP';
+const CURRENCY_SYM = CFG.currencySymbol || '£';
+const CURRENCY_LOCALE = CFG.currencyLocale || 'en-GB';
+const SPONSOR_TARGET = CFG.sponsorTarget || 100000;
+const TIER_NAMES = (CFG.tierNames && CFG.tierNames.length) ? CFG.tierNames : ['Headline','Gold','Silver','Bronze','Media Partner'];
+
+// Apply branding
+document.documentElement.style.setProperty('--primary', PRIMARY);
+document.documentElement.style.setProperty('--primary-dark', shadeColor(PRIMARY, -20));
+document.documentElement.style.setProperty('--primary-light', hexToRgba(PRIMARY, 0.08));
+
+document.getElementById('app-title').textContent = '🤝 ' + EVENT_NAME + ' · Sponsors';
+document.getElementById('app-subtitle').textContent = COMPANY;
+
+const STORAGE_KEY = 'eventhive_event_' + COMPANY.toLowerCase().replace(/[^a-z0-9]/g,'-') + '_sponsors';
+
+const PIPELINE_STAGES = ['prospect','pitched','negotiating','confirmed','fulfilled','renewed','lost'];
+const PIPELINE_LABELS = {prospect:'Prospect',pitched:'Pitched',negotiating:'Negotiating',confirmed:'Confirmed',fulfilled:'Fulfilled',renewed:'Renewed',lost:'Lost'};
+const PIPELINE_COLORS = {prospect:'#64748B',pitched:'#3B82F6',negotiating:'#F59E0B',confirmed:'#10B981',fulfilled:'#16A34A',renewed:'#7C3AED',lost:'#EF4444'};
+
+const DEL_CATEGORIES = ['branding','digital','physical','hospitality','speaking','data'];
+const CAT_COLORS = {branding:'#7C3AED',digital:'#3B82F6',physical:'#10B981',hospitality:'#F59E0B',speaking:'#EF4444',data:'#06B6D4'};
+const CAT_LABELS = {branding:'Branding',digital:'Digital',physical:'Physical',hospitality:'Hospitality',speaking:'Speaking',data:'Data & Analytics'};
+
+const TIER_COLORS_DEFAULT = ['#7C3AED','#D97706','#64748B','#B45309','#0891B2','#DC2626','#059669','#4F46E5'];
+
+let DB = { sponsors:[], packages:[], deliverables:[], payments:[], settings:{} };
+let editingSponsorId = null;
+let editingPackageId = null;
+let editingPaymentId = null;
+let editingCellId = null;
+let editingDelSponsorId = null;
+let draggingSpId = null;
+let pkgDeliverables = [];
+
+// ═══════════════════════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════════════════════
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) DB = JSON.parse(raw);
+  } catch(e) {}
+  DB.sponsors = DB.sponsors || [];
+  DB.packages = DB.packages || [];
+  DB.deliverables = DB.deliverables || [];
+  DB.payments = DB.payments || [];
+  DB.settings = DB.settings || {};
+}
+
+function save() {
+  DB.settings.lastModified = new Date().toISOString();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(DB));
+  updateBadges();
+}
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+}
+
+function updateBadges() {
+  const confirmed = DB.sponsors.filter(s => ['confirmed','fulfilled','renewed'].includes(s.pipeline)).length;
+  document.getElementById('badge-sponsors').textContent = DB.sponsors.length;
+}
+
+// ═══════════════════════════════════════════════════════
+// VIEW SWITCHING
+// ═══════════════════════════════════════════════════════
+function switchView(v) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.getElementById('tab-'+v).classList.add('active');
+  if (v==='dashboard') renderDashboard();
+  else if (v==='sponsors') renderSponsors();
+  else if (v==='deliverables') renderMatrix();
+  else if (v==='payments') renderPayments();
+  else if (v==='pipeline') renderPipeline();
+  else if (v==='packages') renderPackages();
+  else if (v==='export') {}
+}
+
+// ═══════════════════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+document.addEventListener('keydown', e => {
+  if (e.key==='Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+});
+
+// ═══════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════
+function esc(s) {
+  if (s===null||s===undefined) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function fmt(n) {
+  if (!n && n!==0) return '—';
+  return new Intl.NumberFormat(CURRENCY_LOCALE, {style:'currency',currency:CURRENCY_CODE,maximumFractionDigits:0}).format(n);
+}
+
+function shadeColor(hex, pct) {
+  try {
+    const num = parseInt(hex.replace('#',''),16);
+    const r = Math.min(255,Math.max(0,(num>>16)+pct));
+    const g = Math.min(255,Math.max(0,((num>>8)&0xFF)+pct));
+    const b = Math.min(255,Math.max(0,(num&0xFF)+pct));
+    return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
+  } catch(e) { return hex; }
+}
+
+function hexToRgba(hex, alpha) {
+  try {
+    const num = parseInt((hex||'').replace('#',''),16);
+    const r = num>>16, g=(num>>8)&0xFF, b=num&0xFF;
+    return `rgba(${r},${g},${b},${alpha})`;
+  } catch(e) { return hex; }
+}
+
+function getTierColor(tierName) {
+  if (!tierName) return '#94A3B8';
+  const pkg = DB.packages.find(p => p.tierName === tierName);
+  if (pkg && pkg.color) return pkg.color;
+  const idx = TIER_NAMES.indexOf(tierName);
+  return TIER_COLORS_DEFAULT[idx >= 0 ? idx : 0];
+}
+
+function tierBadge(tierName) {
+  if (!tierName) return '';
+  const color = getTierColor(tierName);
+  return `<span class="tier-badge" style="background:${color}20;color:${color}">${esc(tierName)}</span>`;
+}
+
+function statusBadge(st) {
+  return `<span class="status-badge s-${st||'prospect'}">${esc(PIPELINE_LABELS[st]||st)}</span>`;
+}
+
+function payStatus(p) {
+  const today = new Date().toISOString().slice(0,10);
+  if (p.paidDate) return 'paid';
+  if (!p.dueDate) return 'not-due';
+  if (p.dueDate < today) return 'overdue';
+  const diff = (new Date(p.dueDate) - new Date(today)) / (1000*3600*24);
+  if (diff <= 14) return 'due-soon';
+  if (p.invoiceRef) return 'invoiced';
+  return 'not-due';
+}
+
+function payStatusLabel(st) {
+  const map = {paid:'Paid',overdue:'Overdue',dueSoon:'Due Soon','due-soon':'Due Soon',invoiced:'Invoiced','not-due':'Not Yet Due'};
+  return map[st] || st;
+}
+
+function getSponsorDeliverables(sponsorId) {
+  return DB.deliverables.filter(d => d.sponsorId === sponsorId);
+}
+
+function getDelFulfilmentPct(sponsorId) {
+  const dels = getSponsorDeliverables(sponsorId).filter(d => d.rag !== 'na');
+  if (!dels.length) return 100;
+  const totalPromised = dels.reduce((a,d) => a + (d.promised||0), 0);
+  const totalDelivered = dels.reduce((a,d) => a + (d.delivered||0), 0);
+  if (!totalPromised) return 100;
+  return Math.round((totalDelivered / totalPromised) * 100);
+}
+
+function getRagForCell(d) {
+  if (!d) return 'grey';
+  if (d.rag && d.rag !== 'auto') return d.rag === 'na' ? 'grey' : d.rag;
+  if ((d.promised||0) === 0) return 'grey';
+  if ((d.delivered||0) >= (d.promised||0)) return 'green';
+  if ((d.delivered||0) > 0) return 'amber';
+  // Check if overdue
+  if (d.dueDate) {
+    const today = new Date().toISOString().slice(0,10);
+    if (d.dueDate < today) return 'red';
+  }
+  return 'amber';
+}
+
+function populateTierSelect(selId, includeBlank) {
+  const sel = document.getElementById(selId);
+  if (!sel) return;
+  sel.innerHTML = (includeBlank ? '<option value="">— select tier —</option>' : '') +
+    TIER_NAMES.map(t => `<option value="${t}">${t}</option>`).join('');
+}
+
+function populateSponsorSelect(selId, includeBlank) {
+  const sel = document.getElementById(selId);
+  if (!sel) return;
+  sel.innerHTML = (includeBlank ? '<option value="">— select sponsor —</option>' : '') +
+    DB.sponsors.map(s => `<option value="${s.id}">${esc(s.company)}</option>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// SPONSORS VIEW
+// ═══════════════════════════════════════════════════════
+function openSponsorModal(id) {
+  editingSponsorId = id || null;
+  populateTierSelect('sp-tier', false);
+  document.getElementById('sp-tier-deliverables-preview').style.display = 'none';
+  if (id) {
+    const sp = DB.sponsors.find(s => s.id === id);
+    if (!sp) return;
+    document.getElementById('sp-company').value = sp.company || '';
+    document.getElementById('sp-tier').value = sp.tier || TIER_NAMES[0];
+    document.getElementById('sp-pipeline').value = sp.pipeline || 'prospect';
+    document.getElementById('sp-value').value = sp.contractValue || '';
+    document.getElementById('sp-logo').value = sp.logoUrl || '';
+    document.getElementById('sp-contact-name').value = sp.contactName || '';
+    document.getElementById('sp-contact-email').value = sp.contactEmail || '';
+    document.getElementById('sp-contact-phone').value = sp.contactPhone || '';
+    document.getElementById('sp-notes').value = sp.notes || '';
+    document.getElementById('sponsor-modal-title').textContent = 'Edit Sponsor';
+  } else {
+    ['sp-company','sp-logo','sp-contact-name','sp-contact-email','sp-contact-phone','sp-notes'].forEach(i => {
+      const el = document.getElementById(i); if (el) el.value = '';
+    });
+    document.getElementById('sp-value').value = '';
+    document.getElementById('sp-tier').value = TIER_NAMES[0];
+    document.getElementById('sp-pipeline').value = 'prospect';
+    document.getElementById('sponsor-modal-title').textContent = 'Add Sponsor';
+    onTierChange();
+  }
+  openModal('sponsor-modal');
+  setTimeout(() => document.getElementById('sp-company').focus(), 100);
+}
+
+function onTierChange() {
+  const tierName = document.getElementById('sp-tier').value;
+  const pkg = DB.packages.find(p => p.tierName === tierName);
+  const preview = document.getElementById('sp-tier-deliverables-preview');
+  const list = document.getElementById('tier-del-preview');
+  if (pkg && pkg.deliverables && pkg.deliverables.length && !editingSponsorId) {
+    preview.style.display = '';
+    list.innerHTML = pkg.deliverables.map(d =>
+      `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid var(--border)">
+        <span style="width:10px;height:10px;border-radius:50%;background:${CAT_COLORS[d.category]||'#94A3B8'};flex-shrink:0"></span>
+        <span><strong>${d.qty||1}×</strong> ${esc(d.name)}</span>
+        <span class="text-xs text-muted">(${esc(d.category)})</span>
+      </div>`
+    ).join('');
+    // Also set typical value if blank
+    const valEl = document.getElementById('sp-value');
+    if ((!valEl.value || valEl.value === '0') && pkg.typicalValue) valEl.value = pkg.typicalValue;
+  } else {
+    preview.style.display = 'none';
+  }
+}
+
+function saveSponsor() {
+  const company = document.getElementById('sp-company').value.trim();
+  if (!company) { alert('Company name is required'); return; }
+  const isNew = !editingSponsorId;
+  const tier = document.getElementById('sp-tier').value;
+  const data = {
+    id: editingSponsorId || uid(),
+    company,
+    tier,
+    pipeline: document.getElementById('sp-pipeline').value,
+    contractValue: parseFloat(document.getElementById('sp-value').value) || 0,
+    logoUrl: document.getElementById('sp-logo').value.trim(),
+    contactName: document.getElementById('sp-contact-name').value.trim(),
+    contactEmail: document.getElementById('sp-contact-email').value.trim(),
+    contactPhone: document.getElementById('sp-contact-phone').value.trim(),
+    notes: document.getElementById('sp-notes').value.trim(),
+    updatedAt: new Date().toISOString(),
+    createdAt: editingSponsorId ? (DB.sponsors.find(s=>s.id===editingSponsorId)||{}).createdAt : new Date().toISOString()
+  };
+  if (editingSponsorId) {
+    const idx = DB.sponsors.findIndex(s => s.id === editingSponsorId);
+    if (idx >= 0) DB.sponsors[idx] = data;
+  } else {
+    DB.sponsors.push(data);
+    // Auto-populate deliverables from tier template
+    const pkg = DB.packages.find(p => p.tierName === tier);
+    if (pkg && pkg.deliverables) {
+      pkg.deliverables.forEach(d => {
+        DB.deliverables.push({
+          id: uid(),
+          sponsorId: data.id,
+          name: d.name,
+          category: d.category || 'branding',
+          promised: d.qty || 1,
+          delivered: 0,
+          dueDate: '',
+          notes: '',
+          rag: 'auto',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
+      });
+    }
+  }
+  save();
+  closeModal('sponsor-modal');
+  renderSponsors();
+}
+
+function deleteSponsor(id) {
+  if (!confirm('Delete this sponsor? All their deliverables and payment milestones will also be removed.')) return;
+  DB.sponsors = DB.sponsors.filter(s => s.id !== id);
+  DB.deliverables = DB.deliverables.filter(d => d.sponsorId !== id);
+  DB.payments = DB.payments.filter(p => p.sponsorId !== id);
+  save();
+  renderSponsors();
+}
+
+function renderSponsors() {
+  // populate tier filter
+  const tf = document.getElementById('sponsor-tier-filter');
+  const cv = tf.value;
+  tf.innerHTML = '<option value="">All tiers</option>' + TIER_NAMES.map(t => `<option value="${t}"${t===cv?' selected':''}>${t}</option>`).join('');
+
+  const q = (document.getElementById('sponsor-search').value||'').toLowerCase();
+  const tierF = document.getElementById('sponsor-tier-filter').value;
+  const statusF = document.getElementById('sponsor-status-filter').value;
+
+  let list = DB.sponsors.filter(s => {
+    if (q && !s.company.toLowerCase().includes(q) && !(s.contactName||'').toLowerCase().includes(q)) return false;
+    if (tierF && s.tier !== tierF) return false;
+    if (statusF && s.pipeline !== statusF) return false;
+    return true;
+  });
+
+  const confirmed = DB.sponsors.filter(s => ['confirmed','fulfilled','renewed'].includes(s.pipeline));
+  const totalValue = confirmed.reduce((a,s) => a+s.contractValue, 0);
+  const totalPaid = DB.payments.filter(p => p.paidDate).reduce((a,p) => a+p.amount, 0);
+
+  document.getElementById('sponsors-stats').innerHTML = `
+    <div class="stat-chip"><span class="sc-num">${DB.sponsors.length}</span><span class="sc-lbl">Total Sponsors</span></div>
+    <div class="stat-chip"><span class="sc-num" style="color:var(--success)">${confirmed.length}</span><span class="sc-lbl">Confirmed</span></div>
+    <div class="stat-chip"><span class="sc-num" style="color:var(--primary)">${fmt(totalValue)}</span><span class="sc-lbl">Contracted Revenue</span></div>
+    <div class="stat-chip"><span class="sc-num" style="color:var(--success)">${fmt(totalPaid)}</span><span class="sc-lbl">Collected</span></div>
+  `;
+
+  const cont = document.getElementById('sponsors-container');
+  if (!list.length) {
+    cont.innerHTML = `<div class="empty"><div class="empty-icon">🤝</div><h3>${DB.sponsors.length?'No results':'No sponsors yet'}</h3><p>${DB.sponsors.length?'Adjust your filters':'Add your first sponsor to get started'}</p>${!DB.sponsors.length?'<button class="btn btn-primary" onclick="openSponsorModal()">+ Add Sponsor</button>':''}</div>`;
+    return;
+  }
+
+  cont.innerHTML = '<div class="card-grid">' + list.map(sp => sponsorCard(sp)).join('') + '</div>';
+}
+
+function sponsorCard(sp) {
+  const color = getTierColor(sp.tier);
+  const dels = getSponsorDeliverables(sp.id);
+  const pct = getDelFulfilmentPct(sp.id);
+  const payments = DB.payments.filter(p => p.sponsorId === sp.id);
+  const paid = payments.filter(p=>p.paidDate).reduce((a,p)=>a+p.amount,0);
+  const outstanding = payments.filter(p=>!p.paidDate).reduce((a,p)=>a+p.amount,0);
+  const initials = sp.company.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  return `<div class="card sponsor-card">
+    <div class="sponsor-card-stripe" style="background:${color}"></div>
+    <div class="sponsor-card-body">
+      <div class="sponsor-card-header">
+        <div class="sponsor-logo">
+          ${sp.logoUrl ? `<img src="${esc(sp.logoUrl)}" alt="${esc(sp.company)}" onerror="this.parentElement.textContent='${initials}'">` : `<span style="color:${color};font-size:.9rem">${initials}</span>`}
+        </div>
+        <div class="sponsor-card-info">
+          <h3>${esc(sp.company)}</h3>
+          <div class="contact">${sp.contactName?esc(sp.contactName):'No contact set'}</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px">
+            ${tierBadge(sp.tier)}
+            ${statusBadge(sp.pipeline)}
+          </div>
+        </div>
+        <div class="sponsor-card-actions">
+          <button class="btn btn-ghost btn-sm btn-icon" onclick="openSponsorModal('${sp.id}')" title="Edit">✏</button>
+          <button class="btn btn-ghost btn-sm btn-icon text-danger" onclick="deleteSponsor('${sp.id}')" title="Delete">🗑</button>
+        </div>
+      </div>
+      <div class="card-meta">
+        <div class="card-meta-item">💰 <strong>${fmt(sp.contractValue)}</strong></div>
+        ${dels.length ? `<div class="card-meta-item">📋 ${pct}% delivered</div>` : ''}
+        ${paid > 0 ? `<div class="card-meta-item text-success">✓ ${fmt(paid)} paid</div>` : ''}
+        ${outstanding > 0 ? `<div class="card-meta-item text-warning">⏳ ${fmt(outstanding)} due</div>` : ''}
+      </div>
+      ${dels.length ? `<div class="progress-bar mt-2"><div class="progress-fill" style="width:${pct}%;background:${pct>=100?'var(--success)':pct>=60?'var(--warning)':'var(--danger)'}"></div></div>` : ''}
+      <div class="flex gap-2 mt-3">
+        <button class="btn btn-secondary btn-sm flex-1" onclick="openSponsorDelModal('${sp.id}')">📋 Deliverables (${dels.length})</button>
+        <button class="btn btn-secondary btn-sm flex-1" onclick="openPaymentModal('${sp.id}')">+ Payment</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// DELIVERABLES MATRIX
+// ═══════════════════════════════════════════════════════
+function renderMatrix() {
+  // populate tier filter
+  const tf = document.getElementById('matrix-tier-filter');
+  const cv = tf.value;
+  tf.innerHTML = '<option value="">All tiers</option>' + TIER_NAMES.map(t=>`<option value="${t}"${t===cv?' selected':''}>${t}</option>`).join('');
+
+  const tierF = document.getElementById('matrix-tier-filter').value;
+  const catF = document.getElementById('matrix-cat-filter').value;
+  const statusF = document.getElementById('matrix-status-filter').value;
+
+  let sponsors = DB.sponsors.filter(s => {
+    if (tierF && s.tier !== tierF) return false;
+    if (!['confirmed','fulfilled','renewed','pitched','negotiating'].includes(s.pipeline)) return false;
+    return true;
+  });
+
+  // Get all unique deliverable names across these sponsors, filtered by category
+  let allDels = DB.deliverables.filter(d => sponsors.some(s => s.id === d.sponsorId));
+  if (catF) allDels = allDels.filter(d => d.category === catF);
+  if (statusF === 'outstanding') allDels = allDels.filter(d => (d.delivered||0) < (d.promised||0) && d.rag !== 'na');
+
+  if (!sponsors.length) {
+    document.getElementById('matrix-container').innerHTML = `<div class="empty"><div class="empty-icon">📋</div><h3>No confirmed sponsors</h3><p>Confirm sponsors in the Pipeline to see the deliverables matrix</p></div>`;
+    return;
+  }
+  if (!allDels.length) {
+    document.getElementById('matrix-container').innerHTML = `<div class="empty"><div class="empty-icon">📋</div><h3>No deliverables yet</h3><p>Add deliverables to sponsors via their cards, or assign tier packages with templates</p></div>`;
+    return;
+  }
+
+  // Group deliverables by category
+  const byCategory = {};
+  DEL_CATEGORIES.forEach(cat => {
+    const catDels = allDels.filter(d => d.category === cat);
+    if (!catDels.length) return;
+    // Unique deliverable names in this category
+    const names = [...new Set(catDels.map(d => d.name))];
+    if (names.length) byCategory[cat] = names;
+  });
+  // Also catch uncategorised
+  const otherDels = allDels.filter(d => !DEL_CATEGORIES.includes(d.category));
+  if (otherDels.length) byCategory['other'] = [...new Set(otherDels.map(d => d.name))];
+
+  const cats = Object.keys(byCategory);
+  if (!cats.length) {
+    document.getElementById('matrix-container').innerHTML = `<div class="empty"><div class="empty-icon">📋</div><h3>No deliverables match filters</h3></div>`;
+    return;
+  }
+
+  // Count total columns
+  const totalCols = cats.reduce((a,c) => a + byCategory[c].length, 0);
+
+  let html = `<div class="matrix-wrap"><table class="matrix-table"><thead>`;
+  // Category header row
+  html += '<tr><th class="sponsor-col" rowspan="2">Sponsor</th>';
+  cats.forEach(cat => {
+    html += `<th colspan="${byCategory[cat].length}" style="background:${hexToRgba(CAT_COLORS[cat]||'#94A3B8',0.12)};color:${CAT_COLORS[cat]||'#64748B'}">${CAT_LABELS[cat]||cat}</th>`;
+  });
+  html += '</tr><tr>';
+  // Deliverable name sub-headers
+  cats.forEach(cat => {
+    byCategory[cat].forEach(name => {
+      html += `<th style="font-weight:500;max-width:80px;overflow:hidden;text-overflow:ellipsis" title="${esc(name)}">${esc(name.length>14?name.slice(0,13)+'…':name)}</th>`;
+    });
+  });
+  html += '</tr></thead><tbody>';
+
+  sponsors.forEach(sp => {
+    const color = getTierColor(sp.tier);
+    html += `<tr><td class="sponsor-cell">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:6px;height:32px;border-radius:3px;background:${color};flex-shrink:0"></div>
+        <div>
+          <div style="font-weight:600;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px">${esc(sp.company)}</div>
+          <div style="font-size:.7rem;color:var(--text-2)">${sp.tier||''}</div>
+        </div>
+      </div>
+    </td>`;
+    cats.forEach(cat => {
+      byCategory[cat].forEach(name => {
+        const del = DB.deliverables.find(d => d.sponsorId === sp.id && d.name === name && (d.category === cat || (cat==='other' && !DEL_CATEGORIES.includes(d.category))));
+        if (!del) {
+          html += `<td class="matrix-cell"><div class="cell-inner"><span class="cell-n-a">—</span></div></td>`;
+        } else {
+          const rag = getRagForCell(del);
+          const statusClass = del.rag==='na' ? 'not-started' : (rag==='green'?'fulfilled':rag==='amber'?'partial':rag==='red'?'overdue':'not-started');
+          html += `<td class="matrix-cell" onclick="openCellModal('${del.id}')">
+            <div class="cell-inner ${statusClass}" title="Click to update — ${esc(del.name)}: ${del.delivered||0}/${del.promised||0}">
+              ${del.rag==='na' ? '<span class="cell-n-a text-xs">N/A</span>' :
+                `<span class="cell-qty" style="color:${rag==='green'?'var(--success)':rag==='amber'?'var(--warning)':rag==='red'?'var(--danger)':'var(--text-2)'}">${del.delivered||0}/${del.promised||0}</span>
+                 <span class="cell-label">${rag==='green'?'✓':rag==='red'?'⚠':'·'}</span>`}
+            </div>
+          </td>`;
+        }
+      });
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
+  document.getElementById('matrix-container').innerHTML = html;
+}
+
+function openCellModal(delId) {
+  editingCellId = delId;
+  const d = DB.deliverables.find(x => x.id === delId);
+  if (!d) return;
+  const sp = DB.sponsors.find(s => s.id === d.sponsorId);
+  document.getElementById('cell-modal-title').textContent = `${sp?sp.company:'?'} — ${d.name}`;
+  document.getElementById('cell-promised').value = d.promised || 0;
+  document.getElementById('cell-delivered').value = d.delivered || 0;
+  document.getElementById('cell-due-date').value = d.dueDate || '';
+  document.getElementById('cell-rag').value = d.rag || 'auto';
+  document.getElementById('cell-notes').value = d.notes || '';
+  openModal('cell-modal');
+  setTimeout(() => document.getElementById('cell-delivered').focus(), 100);
+}
+
+function saveCellEdit() {
+  const d = DB.deliverables.find(x => x.id === editingCellId);
+  if (!d) return;
+  d.promised = parseInt(document.getElementById('cell-promised').value) || 0;
+  d.delivered = parseInt(document.getElementById('cell-delivered').value) || 0;
+  d.dueDate = document.getElementById('cell-due-date').value;
+  d.rag = document.getElementById('cell-rag').value;
+  d.notes = document.getElementById('cell-notes').value.trim();
+  d.updatedAt = new Date().toISOString();
+  save();
+  closeModal('cell-modal');
+  renderMatrix();
+}
+
+// ═══════════════════════════════════════════════════════
+// SPONSOR DELIVERABLES MANAGE MODAL
+// ═══════════════════════════════════════════════════════
+function openSponsorDelModal(sponsorId) {
+  editingDelSponsorId = sponsorId;
+  const sp = DB.sponsors.find(s => s.id === sponsorId);
+  document.getElementById('sponsor-del-title').textContent = `Deliverables: ${sp ? sp.company : '?'}`;
+  renderSponsorDelBody();
+  openModal('sponsor-del-modal');
+}
+
+function renderSponsorDelBody() {
+  const dels = DB.deliverables.filter(d => d.sponsorId === editingDelSponsorId);
+  const cont = document.getElementById('sponsor-del-body');
+  if (!dels.length) {
+    cont.innerHTML = `<p class="text-sm text-muted">No deliverables yet. Click "+ Add Deliverable" to add one.</p>`;
+    return;
+  }
+  cont.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 70px 70px 100px 100px 40px;gap:8px;align-items:center;font-size:.75rem;font-weight:600;color:var(--text-2);padding:0 0 6px;border-bottom:1px solid var(--border);margin-bottom:6px">
+      <span>Deliverable</span><span>Promised</span><span>Delivered</span><span>Category</span><span>Due Date</span><span></span>
+    </div>
+    ${dels.map(d => `
+    <div style="display:grid;grid-template-columns:1fr 70px 70px 100px 100px 40px;gap:8px;align-items:center;padding:4px 0;border-bottom:1px solid var(--border)">
+      <div>
+        <input class="form-control" style="font-size:.82rem;padding:4px 8px" value="${esc(d.name)}" onchange="updateDelField('${d.id}','name',this.value)">
+      </div>
+      <input class="form-control" type="number" min="0" style="font-size:.82rem;padding:4px 8px" value="${d.promised||0}" onchange="updateDelField('${d.id}','promised',parseInt(this.value)||0)">
+      <input class="form-control" type="number" min="0" style="font-size:.82rem;padding:4px 8px" value="${d.delivered||0}" onchange="updateDelField('${d.id}','delivered',parseInt(this.value)||0)">
+      <select class="form-control" style="font-size:.78rem;padding:4px 6px" onchange="updateDelField('${d.id}','category',this.value)">
+        ${DEL_CATEGORIES.map(c=>`<option value="${c}"${c===d.category?' selected':''}>${CAT_LABELS[c]||c}</option>`).join('')}
+      </select>
+      <input class="form-control" type="date" style="font-size:.78rem;padding:4px 6px" value="${d.dueDate||''}" onchange="updateDelField('${d.id}','dueDate',this.value)">
+      <button class="btn btn-ghost btn-sm btn-icon text-danger" onclick="deleteDel('${d.id}')">🗑</button>
+    </div>`).join('')}
+  `;
+}
+
+function updateDelField(delId, field, value) {
+  const d = DB.deliverables.find(x => x.id === delId);
+  if (!d) return;
+  d[field] = value;
+  d.updatedAt = new Date().toISOString();
+  save();
+}
+
+function addSponsorDeliverable() {
+  if (!editingDelSponsorId) return;
+  DB.deliverables.push({
+    id: uid(),
+    sponsorId: editingDelSponsorId,
+    name: 'New Deliverable',
+    category: 'branding',
+    promised: 1,
+    delivered: 0,
+    dueDate: '',
+    notes: '',
+    rag: 'auto',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  });
+  save();
+  renderSponsorDelBody();
+}
+
+function deleteDel(delId) {
+  if (!confirm('Remove this deliverable?')) return;
+  DB.deliverables = DB.deliverables.filter(d => d.id !== delId);
+  save();
+  renderSponsorDelBody();
+}
+
+// ═══════════════════════════════════════════════════════
+// PAYMENTS VIEW
+// ═══════════════════════════════════════════════════════
+function openPaymentModal(sponsorId, paymentId) {
+  editingPaymentId = paymentId || null;
+  populateSponsorSelect('pay-sponsor', true);
+  const milestone = document.getElementById('pay-milestone');
+  milestone.onchange = function() {
+    const cn = document.getElementById('pay-custom-name');
+    cn.style.display = this.value === 'custom' ? '' : 'none';
+  };
+  if (paymentId) {
+    const p = DB.payments.find(x => x.id === paymentId);
+    if (!p) return;
+    document.getElementById('pay-sponsor').value = p.sponsorId;
+    document.getElementById('pay-milestone').value = ['deposit','interim','balance','final'].includes(p.milestoneName) ? p.milestoneName : 'custom';
+    document.getElementById('pay-custom-name').value = p.milestoneName;
+    document.getElementById('pay-custom-name').style.display = ['deposit','interim','balance','final'].includes(p.milestoneName) ? 'none' : '';
+    document.getElementById('pay-amount').value = p.amount || '';
+    document.getElementById('pay-due-date').value = p.dueDate || '';
+    document.getElementById('pay-invoice-ref').value = p.invoiceRef || '';
+    document.getElementById('pay-paid-date').value = p.paidDate || '';
+    document.getElementById('payment-modal-title').textContent = 'Edit Payment Milestone';
+  } else {
+    if (sponsorId) document.getElementById('pay-sponsor').value = sponsorId;
+    document.getElementById('pay-milestone').value = 'deposit';
+    document.getElementById('pay-custom-name').style.display = 'none';
+    document.getElementById('pay-amount').value = '';
+    document.getElementById('pay-due-date').value = '';
+    document.getElementById('pay-invoice-ref').value = '';
+    document.getElementById('pay-paid-date').value = '';
+    document.getElementById('payment-modal-title').textContent = 'Add Payment Milestone';
+  }
+  openModal('payment-modal');
+}
+
+function savePayment() {
+  const sponsorId = document.getElementById('pay-sponsor').value;
+  const milestoneRaw = document.getElementById('pay-milestone').value;
+  const milestoneName = milestoneRaw === 'custom' ? document.getElementById('pay-custom-name').value.trim() : milestoneRaw;
+  const amount = parseFloat(document.getElementById('pay-amount').value) || 0;
+  const dueDate = document.getElementById('pay-due-date').value;
+  if (!sponsorId) { alert('Please select a sponsor'); return; }
+  if (!milestoneName) { alert('Milestone name is required'); return; }
+  if (!amount) { alert('Amount is required'); return; }
+  const data = {
+    id: editingPaymentId || uid(),
+    sponsorId,
+    milestoneName,
+    amount,
+    dueDate,
+    invoiceRef: document.getElementById('pay-invoice-ref').value.trim(),
+    paidDate: document.getElementById('pay-paid-date').value,
+    updatedAt: new Date().toISOString(),
+    createdAt: editingPaymentId ? (DB.payments.find(p=>p.id===editingPaymentId)||{}).createdAt : new Date().toISOString()
+  };
+  if (editingPaymentId) {
+    const idx = DB.payments.findIndex(p => p.id === editingPaymentId);
+    if (idx >= 0) DB.payments[idx] = data;
+  } else {
+    DB.payments.push(data);
+  }
+  save();
+  closeModal('payment-modal');
+  renderPayments();
+}
+
+function deletePayment(id) {
+  if (!confirm('Delete this payment milestone?')) return;
+  DB.payments = DB.payments.filter(p => p.id !== id);
+  save();
+  renderPayments();
+}
+
+function renderPayments() {
+  // populate sponsor filter
+  const sf = document.getElementById('payment-sponsor-filter');
+  const sv = sf.value;
+  sf.innerHTML = '<option value="">All sponsors</option>' + DB.sponsors.map(s => `<option value="${s.id}"${s.id===sv?' selected':''}>${esc(s.company)}</option>`).join('');
+
+  const sponsorF = sf.value;
+  const statusF = document.getElementById('payment-status-filter').value;
+
+  const totalContract = DB.sponsors.filter(s=>['confirmed','fulfilled','renewed'].includes(s.pipeline)).reduce((a,s)=>a+s.contractValue,0);
+  const totalInvoiced = DB.payments.filter(p=>p.invoiceRef||p.paidDate).reduce((a,p)=>a+p.amount,0);
+  const totalPaid = DB.payments.filter(p=>p.paidDate).reduce((a,p)=>a+p.amount,0);
+  const totalOutstanding = DB.payments.filter(p=>!p.paidDate).reduce((a,p)=>a+p.amount,0);
+  const overdue = DB.payments.filter(p=>payStatus(p)==='overdue').length;
+
+  document.getElementById('payments-stats').innerHTML = `
+    <div class="stat-chip"><span class="sc-num">${fmt(totalContract)}</span><span class="sc-lbl">Total Contracted</span></div>
+    <div class="stat-chip"><span class="sc-num">${fmt(totalInvoiced)}</span><span class="sc-lbl">Invoiced</span></div>
+    <div class="stat-chip"><span class="sc-num" style="color:var(--success)">${fmt(totalPaid)}</span><span class="sc-lbl">Paid</span></div>
+    <div class="stat-chip"><span class="sc-num" style="color:var(--warning)">${fmt(totalOutstanding)}</span><span class="sc-lbl">Outstanding</span></div>
+    ${overdue ? `<div class="stat-chip"><span class="sc-num" style="color:var(--danger)">${overdue}</span><span class="sc-lbl">Overdue</span></div>` : ''}
+  `;
+
+  let payments = DB.payments.filter(p => {
+    if (sponsorF && p.sponsorId !== sponsorF) return false;
+    if (statusF && payStatus(p) !== statusF) return false;
+    return true;
+  }).sort((a,b) => (a.dueDate||'').localeCompare(b.dueDate||''));
+
+  const tbody = document.getElementById('payments-tbody');
+  const empty = document.getElementById('payments-empty');
+
+  if (!payments.length) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+  tbody.innerHTML = payments.map(p => {
+    const sp = DB.sponsors.find(s => s.id === p.sponsorId);
+    const st = payStatus(p);
+    const stClass = {paid:'pay-paid',overdue:'pay-overdue','due-soon':'pay-due-soon',invoiced:'pay-invoiced','not-due':'pay-not-due'}[st];
+    return `<tr>
+      <td>
+        <div style="font-weight:600;font-size:.85rem">${sp?esc(sp.company):'Unknown'}</div>
+        ${sp?`<div class="text-xs text-muted">${tierBadge(sp.tier)}</div>`:''}
+      </td>
+      <td>${esc(p.milestoneName)}</td>
+      <td><strong>${fmt(p.amount)}</strong></td>
+      <td class="${st==='overdue'?'text-danger':st==='due-soon'?'text-warning':''}">${p.dueDate||'—'}</td>
+      <td class="text-xs">${esc(p.invoiceRef||'—')}</td>
+      <td><span class="status-badge ${stClass}">${payStatusLabel(st)}</span></td>
+      <td class="${p.paidDate?'text-success':''}">${p.paidDate||'—'}</td>
+      <td>
+        <div class="flex gap-2">
+          <button class="btn btn-ghost btn-sm btn-icon" onclick="openPaymentModal('${p.sponsorId}','${p.id}')">✏</button>
+          <button class="btn btn-ghost btn-sm btn-icon text-danger" onclick="deletePayment('${p.id}')">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// PIPELINE KANBAN
+// ═══════════════════════════════════════════════════════
+function renderPipeline() {
+  const board = document.getElementById('kanban-board');
+  board.innerHTML = PIPELINE_STAGES.map(stage => {
+    const sponsors = DB.sponsors.filter(s => s.pipeline === stage);
+    const stageValue = sponsors.reduce((a,s)=>a+s.contractValue,0);
+    return `<div class="kanban-col" id="kcol-${stage}"
+      ondragover="dragOver(event,'${stage}')" ondrop="drop(event,'${stage}')" ondragleave="dragLeave(event)">
+      <div class="kanban-header" style="border-top:3px solid ${PIPELINE_COLORS[stage]}">
+        <div>
+          ${PIPELINE_LABELS[stage]}
+          <div class="kanban-value">${stageValue?fmt(stageValue):''}</div>
+        </div>
+        <span class="kanban-count">${sponsors.length}</span>
+      </div>
+      <div class="kanban-body" id="kcol-body-${stage}">
+        ${sponsors.map(s => kanbanCard(s)).join('')}
+        ${!sponsors.length?`<div style="color:var(--text-3);font-size:.75rem;text-align:center;padding:10px">Drop here</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function kanbanCard(sp) {
+  const color = getTierColor(sp.tier);
+  const pct = getDelFulfilmentPct(sp.id);
+  return `<div class="kanban-card" draggable="true" id="kc-${sp.id}"
+    style="border-left-color:${color}"
+    ondragstart="dragStart(event,'${sp.id}')" ondragend="dragEnd(event)">
+    <h4>${esc(sp.company)}</h4>
+    <div class="kc-tier" style="color:${color}">${esc(sp.tier||'—')}</div>
+    <div class="kc-value">${fmt(sp.contractValue)}</div>
+    ${getSponsorDeliverables(sp.id).length ? `<div class="text-xs text-muted mt-2">📋 ${pct}% delivered</div>` : ''}
+    <div class="flex gap-2 mt-2">
+      <button class="btn btn-ghost btn-sm" style="padding:2px 6px;font-size:.72rem" onclick="openSponsorModal('${sp.id}')">Edit</button>
+      <select style="font-size:.72rem;padding:2px 4px;border:1px solid var(--border);border-radius:4px;outline:none;cursor:pointer;flex:1" onchange="moveSponsor('${sp.id}',this.value)">
+        ${PIPELINE_STAGES.map(st=>`<option value="${st}"${st===sp.pipeline?' selected':''}>${PIPELINE_LABELS[st]}</option>`).join('')}
+      </select>
+    </div>
+  </div>`;
+}
+
+function dragStart(e, id) {
+  draggingSpId = id;
+  e.dataTransfer.effectAllowed = 'move';
+  setTimeout(() => { const el=document.getElementById('kc-'+id); if(el) el.classList.add('dragging'); }, 0);
+}
+function dragEnd(e) {
+  if (draggingSpId) { const el=document.getElementById('kc-'+draggingSpId); if(el) el.classList.remove('dragging'); }
+  document.querySelectorAll('.kanban-col').forEach(c => c.classList.remove('drag-over'));
+}
+function dragOver(e, stage) {
+  e.preventDefault();
+  document.querySelectorAll('.kanban-col').forEach(c => c.classList.remove('drag-over'));
+  document.getElementById('kcol-'+stage)?.classList.add('drag-over');
+}
+function dragLeave(e) {
+  if (!e.currentTarget.contains(e.relatedTarget)) e.currentTarget.classList.remove('drag-over');
+}
+function drop(e, stage) {
+  e.preventDefault();
+  document.querySelectorAll('.kanban-col').forEach(c => c.classList.remove('drag-over'));
+  if (draggingSpId) moveSponsor(draggingSpId, stage);
+  draggingSpId = null;
+}
+function moveSponsor(id, pipeline) {
+  const sp = DB.sponsors.find(s => s.id === id);
+  if (!sp || sp.pipeline === pipeline) return;
+  sp.pipeline = pipeline;
+  sp.updatedAt = new Date().toISOString();
+  save();
+  renderPipeline();
+}
+
+// ═══════════════════════════════════════════════════════
+// PACKAGES VIEW
+// ═══════════════════════════════════════════════════════
+function openPackageModal(id) {
+  editingPackageId = id || null;
+  pkgDeliverables = [];
+  populateTierSelect('pkg-tier', true);
+  document.getElementById('pkg-deliverables-list').innerHTML = '';
+  if (id) {
+    const pkg = DB.packages.find(p => p.id === id);
+    if (!pkg) return;
+    document.getElementById('pkg-tier').value = pkg.tierName || '';
+    document.getElementById('pkg-color').value = pkg.color || '#7C3AED';
+    document.getElementById('pkg-value').value = pkg.typicalValue || '';
+    document.getElementById('pkg-max').value = pkg.maxSponsors || '';
+    pkgDeliverables = (pkg.deliverables || []).map(d => ({...d}));
+    renderPkgDeliverables();
+    document.getElementById('package-modal-title').textContent = 'Edit Package';
+  } else {
+    document.getElementById('pkg-tier').value = '';
+    document.getElementById('pkg-color').value = TIER_COLORS_DEFAULT[DB.packages.length % TIER_COLORS_DEFAULT.length];
+    document.getElementById('pkg-value').value = '';
+    document.getElementById('pkg-max').value = '';
+    document.getElementById('package-modal-title').textContent = 'Add Package';
+  }
+  openModal('package-modal');
+}
+
+function addDeliverableRow(del) {
+  pkgDeliverables.push(del || {id:uid(),name:'',category:'branding',qty:1,description:''});
+  renderPkgDeliverables();
+}
+
+function renderPkgDeliverables() {
+  const cont = document.getElementById('pkg-deliverables-list');
+  if (!pkgDeliverables.length) {
+    cont.innerHTML = '<p class="text-sm text-muted">No deliverables defined. Click "+ Add Deliverable".</p>';
+    return;
+  }
+  cont.innerHTML = pkgDeliverables.map((d,i) => `
+    <div style="display:grid;grid-template-columns:1fr 80px 120px auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
+      <input class="form-control" style="font-size:.82rem;padding:4px 8px" placeholder="Deliverable name" value="${esc(d.name)}" onchange="pkgDeliverables[${i}].name=this.value">
+      <input class="form-control" type="number" min="1" style="font-size:.82rem;padding:4px 8px" value="${d.qty||1}" onchange="pkgDeliverables[${i}].qty=parseInt(this.value)||1">
+      <select class="form-control" style="font-size:.78rem;padding:4px 6px" onchange="pkgDeliverables[${i}].category=this.value">
+        ${DEL_CATEGORIES.map(c=>`<option value="${c}"${c===d.category?' selected':''}>${CAT_LABELS[c]||c}</option>`).join('')}
+      </select>
+      <button class="btn btn-ghost btn-sm btn-icon text-danger" onclick="pkgDeliverables.splice(${i},1);renderPkgDeliverables()">🗑</button>
+    </div>
+  `).join('');
+}
+
+function savePackage() {
+  const tierName = document.getElementById('pkg-tier').value;
+  if (!tierName) { alert('Please select a tier'); return; }
+  const data = {
+    id: editingPackageId || uid(),
+    tierName,
+    color: document.getElementById('pkg-color').value,
+    typicalValue: parseFloat(document.getElementById('pkg-value').value) || 0,
+    maxSponsors: parseInt(document.getElementById('pkg-max').value) || null,
+    deliverables: pkgDeliverables.filter(d => d.name).map(d => ({...d})),
+    updatedAt: new Date().toISOString(),
+    createdAt: editingPackageId ? (DB.packages.find(p=>p.id===editingPackageId)||{}).createdAt : new Date().toISOString()
+  };
+  if (editingPackageId) {
+    const idx = DB.packages.findIndex(p => p.id === editingPackageId);
+    if (idx >= 0) DB.packages[idx] = data;
+  } else {
+    DB.packages.push(data);
+  }
+  save();
+  closeModal('package-modal');
+  renderPackages();
+}
+
+function deletePackage(id) {
+  if (!confirm('Delete this package template?')) return;
+  DB.packages = DB.packages.filter(p => p.id !== id);
+  save();
+  renderPackages();
+}
+
+function renderPackages() {
+  const cont = document.getElementById('packages-container');
+  const empty = document.getElementById('packages-empty');
+  if (!DB.packages.length) { cont.innerHTML=''; empty.style.display=''; return; }
+  empty.style.display = 'none';
+  cont.innerHTML = DB.packages.map(pkg => {
+    const color = pkg.color || '#7C3AED';
+    const count = DB.sponsors.filter(s => s.tier === pkg.tierName).length;
+    return `<div class="card package-card">
+      <div class="package-card-header" style="background:${color}">
+        <div>
+          <h3>${esc(pkg.tierName)}</h3>
+          ${pkg.typicalValue?`<div style="font-size:.8rem;opacity:.8">${fmt(pkg.typicalValue)}</div>`:''}
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          ${pkg.maxSponsors?`<span style="font-size:.75rem;opacity:.8">${count}/${pkg.maxSponsors} sponsors</span>`:`<span style="font-size:.75rem;opacity:.8">${count} sponsors</span>`}
+          <button class="btn btn-ghost btn-sm btn-icon" style="color:#fff;background:rgba(255,255,255,.2)" onclick="openPackageModal('${pkg.id}')">✏</button>
+          <button class="btn btn-ghost btn-sm btn-icon" style="color:#fff;background:rgba(255,255,255,.2)" onclick="deletePackage('${pkg.id}')">🗑</button>
+        </div>
+      </div>
+      <div class="package-deliverable-list">
+        ${pkg.deliverables&&pkg.deliverables.length ? pkg.deliverables.map(d=>`
+          <div class="pkg-del-item">
+            <span class="cat-dot" style="background:${CAT_COLORS[d.category]||'#94A3B8'}"></span>
+            <span class="pkg-del-qty">${d.qty||1}×</span>
+            <span style="flex:1">${esc(d.name)}</span>
+            <span class="text-xs text-muted">${CAT_LABELS[d.category]||d.category}</span>
+          </div>`).join('') : '<div class="text-sm text-muted" style="padding:8px 0">No deliverables defined</div>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// DASHBOARD (ROI)
+// ═══════════════════════════════════════════════════════
+function renderDashboard() {
+  const confirmed = DB.sponsors.filter(s => ['confirmed','fulfilled','renewed'].includes(s.pipeline));
+  const totalContracted = confirmed.reduce((a,s)=>a+s.contractValue,0);
+  const totalPaid = DB.payments.filter(p=>p.paidDate).reduce((a,p)=>a+p.amount,0);
+  const totalOutstanding = DB.payments.filter(p=>!p.paidDate).reduce((a,p)=>a+p.amount,0);
+  const overdue = DB.payments.filter(p=>payStatus(p)==='overdue');
+  const targetPct = SPONSOR_TARGET > 0 ? Math.round((totalContracted/SPONSOR_TARGET)*100) : 0;
+  const collectionPct = totalContracted > 0 ? Math.round((totalPaid/totalContracted)*100) : 0;
+
+  // Overall fulfilment
+  const allDels = DB.deliverables.filter(d => d.rag !== 'na' && confirmed.some(s=>s.id===d.sponsorId));
+  const totalPromised = allDels.reduce((a,d)=>a+(d.promised||0),0);
+  const totalDelivered = allDels.reduce((a,d)=>a+(d.delivered||0),0);
+  const fulfilmentPct = totalPromised > 0 ? Math.round((totalDelivered/totalPromised)*100) : 100;
+
+  const avgValue = confirmed.length > 0 ? Math.round(totalContracted/confirmed.length) : 0;
+
+  document.getElementById('kpi-grid').innerHTML = `
+    <div class="kpi-card">
+      <div class="kpi-num" style="color:var(--primary)">${fmt(totalContracted)}</div>
+      <div class="kpi-lbl">Confirmed Revenue</div>
+      <div class="kpi-sub">Target: ${fmt(SPONSOR_TARGET)}</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100,targetPct)}%;background:${targetPct>=100?'var(--success)':targetPct>=60?'var(--warning)':'var(--danger)'}"></div></div>
+      <div class="text-xs text-muted mt-2">${targetPct}% of target</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-num" style="color:var(--success)">${fulfilmentPct}%</div>
+      <div class="kpi-lbl">Deliverables Fulfilled</div>
+      <div class="kpi-sub">${totalDelivered} of ${totalPromised} promised</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${fulfilmentPct}%;background:${fulfilmentPct>=80?'var(--success)':fulfilmentPct>=50?'var(--warning)':'var(--danger)'}"></div></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-num" style="color:var(--info)">${collectionPct}%</div>
+      <div class="kpi-lbl">Payment Collection Rate</div>
+      <div class="kpi-sub">${fmt(totalPaid)} of ${fmt(totalContracted)}</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${collectionPct}%;background:var(--info)"></div></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-num">${confirmed.length}</div>
+      <div class="kpi-lbl">Confirmed Sponsors</div>
+      <div class="kpi-sub">${DB.sponsors.filter(s=>['prospect','pitched','negotiating'].includes(s.pipeline)).length} in pipeline</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-num">${fmt(avgValue)}</div>
+      <div class="kpi-lbl">Avg Sponsor Value</div>
+      <div class="kpi-sub">Across confirmed sponsors</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-num" style="color:${overdue.length?'var(--danger)':'var(--success)'}">${overdue.length}</div>
+      <div class="kpi-lbl">Overdue Payments</div>
+      <div class="kpi-sub">${fmt(overdue.reduce((a,p)=>a+p.amount,0))} total overdue</div>
+    </div>
+  `;
+
+  // Revenue by tier chart
+  const tierRevenue = {};
+  TIER_NAMES.forEach(t => {
+    tierRevenue[t] = confirmed.filter(s=>s.tier===t).reduce((a,s)=>a+s.contractValue,0);
+  });
+  const maxTierRev = Math.max(...Object.values(tierRevenue), 1);
+  document.getElementById('chart-revenue-tier').innerHTML = TIER_NAMES.map(t => {
+    if (!tierRevenue[t]) return '';
+    const pct = Math.round((tierRevenue[t]/maxTierRev)*100);
+    const color = getTierColor(t);
+    const count = confirmed.filter(s=>s.tier===t).length;
+    return `<div class="bar-row">
+      <span class="bar-label">${esc(t)} (${count})</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div>
+      <span class="bar-val">${fmt(tierRevenue[t])}</span>
+    </div>`;
+  }).join('') || '<div class="text-sm text-muted">No confirmed sponsor revenue yet</div>';
+
+  // Fulfilment by sponsor (top 8)
+  const topSponsors = [...confirmed]
+    .map(s => ({...s, pct: getDelFulfilmentPct(s.id)}))
+    .sort((a,b) => b.contractValue - a.contractValue)
+    .slice(0,8);
+  document.getElementById('chart-fulfilment').innerHTML = topSponsors.length ? topSponsors.map(s => {
+    const color = s.pct >= 100 ? 'var(--success)' : s.pct >= 60 ? 'var(--warning)' : 'var(--danger)';
+    return `<div class="bar-row">
+      <span class="bar-label">${esc(s.company.length>18?s.company.slice(0,17)+'…':s.company)}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${s.pct}%;background:${color}"></div></div>
+      <span class="bar-val">${s.pct}%</span>
+    </div>`;
+  }).join('') : '<div class="text-sm text-muted">No confirmed sponsors with deliverables</div>';
+
+  // Payment collection chart
+  const payStats = {paid:0,outstanding:0,overdue:0};
+  DB.payments.forEach(p => {
+    if (p.paidDate) payStats.paid += p.amount;
+    else if (payStatus(p)==='overdue') payStats.overdue += p.amount;
+    else payStats.outstanding += p.amount;
+  });
+  const payMax = Math.max(payStats.paid+payStats.outstanding+payStats.overdue, 1);
+  document.getElementById('chart-payments').innerHTML = [
+    {label:'Paid',val:payStats.paid,color:'var(--success)'},
+    {label:'Outstanding',val:payStats.outstanding,color:'var(--warning)'},
+    {label:'Overdue',val:payStats.overdue,color:'var(--danger)'}
+  ].map(row => {
+    if (!row.val) return '';
+    return `<div class="bar-row">
+      <span class="bar-label">${row.label}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round((row.val/payMax)*100)}%;background:${row.color}"></div></div>
+      <span class="bar-val">${fmt(row.val)}</span>
+    </div>`;
+  }).join('') || '<div class="text-sm text-muted">No payment data yet</div>';
+
+  // At-risk deliverables
+  const today = new Date().toISOString().slice(0,10);
+  const atRisk = DB.deliverables.filter(d => {
+    if (d.rag === 'na') return false;
+    const sp = DB.sponsors.find(s => s.id === d.sponsorId);
+    if (!sp || !['confirmed','fulfilled','renewed'].includes(sp.pipeline)) return false;
+    if ((d.delivered||0) >= (d.promised||0)) return false;
+    return getRagForCell(d) === 'red' || (d.dueDate && d.dueDate <= today);
+  }).slice(0,6);
+
+  const riskEl = document.getElementById('risk-list-container');
+  riskEl.innerHTML = atRisk.length ? '<div class="risk-list">' + atRisk.map(d => {
+    const sp = DB.sponsors.find(s => s.id === d.sponsorId);
+    return `<div class="risk-item">
+      <div class="risk-company">${sp?esc(sp.company):'?'} — ${esc(d.name)}</div>
+      <div class="risk-detail">${d.delivered||0}/${d.promised||0} delivered${d.dueDate?` · Due: ${d.dueDate}`:''}</div>
+    </div>`;
+  }).join('') + '</div>' : '<div class="text-sm text-success">✓ No deliverables currently at risk</div>';
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPORT & INTEGRATIONS
+// ═══════════════════════════════════════════════════════
+function printSponsorReport() {
+  const confirmed = DB.sponsors.filter(s => ['confirmed','fulfilled','renewed','pitched','negotiating'].includes(s.pipeline));
+  const win = window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><title>Sponsor Report — ${esc(EVENT_NAME)}</title>
+  <style>
+    body{font-family:-apple-system,sans-serif;max-width:900px;margin:0 auto;padding:24px;color:#1e293b;font-size:13px}
+    h1{font-size:1.6rem;margin-bottom:4px}
+    .meta{color:#64748b;margin-bottom:24px}
+    table{width:100%;border-collapse:collapse;margin-bottom:24px}
+    th{background:#f8fafc;padding:8px 12px;text-align:left;font-size:.78rem;font-weight:600;color:#64748b;border-bottom:2px solid #e2e8f0}
+    td{padding:8px 12px;border-bottom:1px solid #e2e8f0;vertical-align:middle;font-size:.85rem}
+    .tier{padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:700}
+    .summary{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:24px;padding:16px;background:#f8fafc;border-radius:8px}
+    .sum-item .num{font-size:1.4rem;font-weight:700}
+    .sum-item .lbl{font-size:.75rem;color:#64748b}
+    @media print{@page{margin:1.5cm}}
+  </style></head><body>
+  <h1>${esc(EVENT_NAME)}</h1>
+  <div class="meta">Sponsor Report${EVENT_DATE?' · '+EVENT_DATE:''} · Generated ${new Date().toLocaleDateString()}</div>
+  <div class="summary">
+    <div class="sum-item"><div class="num">${confirmed.length}</div><div class="lbl">Confirmed Sponsors</div></div>
+    <div class="sum-item"><div class="num">${CURRENCY_SYM}${confirmed.reduce((a,s)=>a+s.contractValue,0).toLocaleString()}</div><div class="lbl">Total Contracted</div></div>
+    <div class="sum-item"><div class="num">${CURRENCY_SYM}${DB.payments.filter(p=>p.paidDate).reduce((a,p)=>a+p.amount,0).toLocaleString()}</div><div class="lbl">Collected</div></div>
+  </div>
+  <table>
+    <thead><tr><th>Company</th><th>Tier</th><th>Status</th><th>Contract Value</th><th>Contact</th><th>Fulfilment</th></tr></thead>
+    <tbody>${confirmed.sort((a,b)=>b.contractValue-a.contractValue).map(sp=>{
+      const color=getTierColor(sp.tier);
+      const pct=getDelFulfilmentPct(sp.id);
+      return `<tr>
+        <td><strong>${esc(sp.company)}</strong>${sp.logoUrl?`<br><img src="${esc(sp.logoUrl)}" style="height:20px;margin-top:2px;object-fit:contain">`:''}</td>
+        <td><span class="tier" style="background:${color}20;color:${color}">${esc(sp.tier||'—')}</span></td>
+        <td>${esc(PIPELINE_LABELS[sp.pipeline]||sp.pipeline)}</td>
+        <td><strong>${CURRENCY_SYM}${(sp.contractValue||0).toLocaleString()}</strong></td>
+        <td>${esc(sp.contactName||'')}${sp.contactEmail?`<br><small style="color:#64748b">${esc(sp.contactEmail)}</small>`:''}</td>
+        <td>${pct}%</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>
+  </body></html>`);
+  win.document.close();
+  setTimeout(()=>win.print(),500);
+}
+
+function exportDeliverablesCSV() {
+  const headers = ['Sponsor','Tier','Pipeline','Deliverable','Category','Promised','Delivered','Due Date','RAG','Notes'];
+  const rows = DB.deliverables.map(d => {
+    const sp = DB.sponsors.find(s=>s.id===d.sponsorId);
+    return [sp?sp.company:'?', sp?sp.tier:'?', sp?sp.pipeline:'?', d.name, d.category, d.promised||0, d.delivered||0, d.dueDate||'', d.rag||'auto', d.notes||''];
+  });
+  downloadCSV([headers,...rows],'sponsor-deliverables.csv');
+}
+
+function exportSponsorsCSV() {
+  const headers = ['Company','Tier','Pipeline','Contract Value','Contact Name','Contact Email','Contact Phone','Fulfilment %','Notes'];
+  const rows = DB.sponsors.map(sp => [sp.company,sp.tier||'',sp.pipeline||'',sp.contractValue||0,sp.contactName||'',sp.contactEmail||'',sp.contactPhone||'',getDelFulfilmentPct(sp.id),sp.notes||'']);
+  downloadCSV([headers,...rows],'sponsors.csv');
+}
+
+function pushToBudgetTracker() {
+  const confirmed = DB.sponsors.filter(s => ['confirmed','fulfilled','renewed'].includes(s.pipeline));
+  if (!confirmed.length) { alert('No confirmed sponsors to push. Confirm sponsors in the Pipeline first.'); return; }
+  const budgetKey = 'eventhive_event_' + COMPANY.toLowerCase().replace(/[^a-z0-9]/g,'-') + '_budget';
+  const existing = JSON.parse(localStorage.getItem(budgetKey)||'{}');
+  if (!existing.categories) existing.categories = [];
+  if (!existing.lineItems) existing.lineItems = [];
+
+  // Ensure a Sponsor Revenue category exists
+  let revenueCategory = existing.categories.find(c => c.name === 'Sponsor Revenue');
+  if (!revenueCategory) {
+    revenueCategory = { id: uid(), name:'Sponsor Revenue', type:'income', color:'#10B981' };
+    existing.categories.push(revenueCategory);
+  }
+
+  let pushed = 0;
+  confirmed.forEach(sp => {
+    const paid = DB.payments.filter(p=>p.sponsorId===sp.id&&p.paidDate).reduce((a,p)=>a+p.amount,0);
+    const existingItem = existing.lineItems.find(li => li.sourceId === sp.id);
+    const item = {
+      id: existingItem ? existingItem.id : uid(),
+      sourceId: sp.id,
+      categoryId: revenueCategory.id,
+      name: sp.company + ' (' + (sp.tier||'Sponsor') + ')',
+      budget: sp.contractValue||0,
+      actual: paid,
+      type: 'income',
+      notes: `Pushed from Sponsor Deliverables. Status: ${PIPELINE_LABELS[sp.pipeline]||sp.pipeline}`,
+      updatedAt: new Date().toISOString()
+    };
+    if (existingItem) {
+      Object.assign(existingItem, item);
+    } else {
+      existing.lineItems.push(item);
+    }
+    pushed++;
+  });
+  existing.lastUpdatedFromSponsors = new Date().toISOString();
+  localStorage.setItem(budgetKey, JSON.stringify(existing));
+  const msg = `✓ ${pushed} sponsor${pushed!==1?'s':''} pushed to Budget Tracker (key: ${budgetKey})`;
+  document.getElementById('budget-bridge-status').textContent = msg;
+  alert(msg);
+}
+
+function pushToPostEventReport() {
+  const confirmed = DB.sponsors.filter(s => ['confirmed','fulfilled','renewed'].includes(s.pipeline));
+  const perKey = 'eventhive_event_' + COMPANY.toLowerCase().replace(/[^a-z0-9]/g,'-') + '_post_event_report';
+  const existing = JSON.parse(localStorage.getItem(perKey)||'{}');
+  existing.sponsorSummary = {
+    totalSponsors: confirmed.length,
+    totalRevenue: confirmed.reduce((a,s)=>a+s.contractValue,0),
+    totalPaid: DB.payments.filter(p=>p.paidDate).reduce((a,p)=>a+p.amount,0),
+    overallFulfilmentPct: confirmed.length ? Math.round(confirmed.reduce((a,s)=>a+getDelFulfilmentPct(s.id),0)/confirmed.length) : 100,
+    byTier: TIER_NAMES.map(t => {
+      const sps = confirmed.filter(s=>s.tier===t);
+      return { tier:t, count:sps.length, revenue:sps.reduce((a,s)=>a+s.contractValue,0) };
+    }).filter(t=>t.count>0),
+    sponsors: confirmed.map(s => ({company:s.company, tier:s.tier, value:s.contractValue, fulfilmentPct:getDelFulfilmentPct(s.id)})),
+    exportedAt: new Date().toISOString()
+  };
+  localStorage.setItem(perKey, JSON.stringify(existing));
+  const msg = '✓ Sponsor data pushed to Post-Event Report';
+  document.getElementById('per-bridge-status').textContent = msg;
+  alert(msg);
+}
+
+function downloadCSV(rows, filename) {
+  const csv = rows.map(r => r.map(c => `"${String(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download = filename;
+  a.click();
+}
+
+function exportAllJSON() {
+  const a = document.createElement('a');
+  a.href = 'data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(DB,null,2));
+  a.download = 'sponsor-deliverables-backup.json';
+  a.click();
+}
+
+function importJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!confirm(`Import ${(data.sponsors||[]).length} sponsors? This will overwrite current data.`)) return;
+      DB = data;
+      save();
+      renderSponsors();
+      alert('Import successful!');
+    } catch(err) { alert('Invalid JSON: '+err.message); }
+  };
+  reader.readAsText(file);
+}
+
+// ═══════════════════════════════════════════════════════
+// SAMPLE DATA (SD.10)
+// ═══════════════════════════════════════════════════════
+function loadSampleData() {
+  if (DB.sponsors.length > 0 && !confirm('Load sample data? This will replace all existing data.')) return;
+
+  // Sample packages
+  DB.packages = [
+    {id:'pkg-1',tierName:'Headline',color:'#7C3AED',typicalValue:50000,maxSponsors:1,deliverables:[
+      {id:'d1',name:'Logo on Main Stage Banner',category:'branding',qty:1},{id:'d2',name:'Premium Exhibition Stand (6×3m)',category:'physical',qty:1},
+      {id:'d3',name:'Keynote Speaking Slot (30 min)',category:'speaking',qty:1},{id:'d4',name:'Logo on Event Website (hero)',category:'digital',qty:1},
+      {id:'d5',name:'Email Newsletter Feature',category:'digital',qty:3},{id:'d6',name:'Social Media Posts',category:'digital',qty:6},
+      {id:'d7',name:'VIP Dinner Seats',category:'hospitality',qty:4},{id:'d8',name:'Conference Passes',category:'hospitality',qty:10},
+      {id:'d9',name:'Delegate Contact Data (GDPR)',category:'data',qty:1},{id:'d10',name:'Lanyard Branding',category:'branding',qty:1},
+      {id:'d11',name:'Programme Book Full Page Ad',category:'branding',qty:1}
+    ],updatedAt:new Date().toISOString(),createdAt:new Date().toISOString()},
+    {id:'pkg-2',tierName:'Gold',color:'#D97706',typicalValue:25000,maxSponsors:3,deliverables:[
+      {id:'d12',name:'Logo on Event Website',category:'digital',qty:1},{id:'d13',name:'Exhibition Stand (3×2m)',category:'physical',qty:1},
+      {id:'d14',name:'Panel Session Participation',category:'speaking',qty:1},{id:'d15',name:'Email Newsletter Feature',category:'digital',qty:2},
+      {id:'d16',name:'Social Media Posts',category:'digital',qty:4},{id:'d17',name:'VIP Dinner Seats',category:'hospitality',qty:2},
+      {id:'d18',name:'Conference Passes',category:'hospitality',qty:6},{id:'d19',name:'Programme Book Half Page Ad',category:'branding',qty:1},
+      {id:'d20',name:'Logo on Stage Banner',category:'branding',qty:1}
+    ],updatedAt:new Date().toISOString(),createdAt:new Date().toISOString()},
+    {id:'pkg-3',tierName:'Silver',color:'#64748B',typicalValue:12500,maxSponsors:5,deliverables:[
+      {id:'d21',name:'Logo on Event Website',category:'digital',qty:1},{id:'d22',name:'Table-Top Display',category:'physical',qty:1},
+      {id:'d23',name:'Social Media Posts',category:'digital',qty:2},{id:'d24',name:'Conference Passes',category:'hospitality',qty:4},
+      {id:'d25',name:'Programme Book Quarter Page Ad',category:'branding',qty:1},{id:'d26',name:'Email Newsletter Mention',category:'digital',qty:1}
+    ],updatedAt:new Date().toISOString(),createdAt:new Date().toISOString()},
+    {id:'pkg-4',tierName:'Bronze',color:'#B45309',typicalValue:5000,maxSponsors:8,deliverables:[
+      {id:'d27',name:'Logo on Event Website',category:'digital',qty:1},{id:'d28',name:'Conference Passes',category:'hospitality',qty:2},
+      {id:'d29',name:'Social Media Mention',category:'digital',qty:1},{id:'d30',name:'Programme Book Logo',category:'branding',qty:1}
+    ],updatedAt:new Date().toISOString(),createdAt:new Date().toISOString()},
+    {id:'pkg-5',tierName:'Media Partner',color:'#0891B2',typicalValue:0,maxSponsors:4,deliverables:[
+      {id:'d31',name:'Logo on Event Website',category:'digital',qty:1},{id:'d32',name:'Media Coverage (articles)',category:'digital',qty:3},
+      {id:'d33',name:'Social Media Posts',category:'digital',qty:4},{id:'d34',name:'Press Passes',category:'hospitality',qty:2},
+      {id:'d35',name:'Programme Book Media Logo',category:'branding',qty:1}
+    ],updatedAt:new Date().toISOString(),createdAt:new Date().toISOString()}
+  ];
+
+  // Sample sponsors (12 across 5 tiers)
+  const sponsorData = [
+    {company:'FutureTech Labs',tier:'Headline',pipeline:'confirmed',contractValue:50000,contactName:'Rebecca Mills',contactEmail:'rebecca@futuretech.ai',contactPhone:'+44 7700 100001',notes:'Long-standing partner — requires premium stand location near registration.',logoUrl:''},
+    {company:'Nexus Consulting',tier:'Gold',pipeline:'confirmed',contractValue:25000,contactName:'Priya Sharma',contactEmail:'priya.sharma@nexus.co',contactPhone:'+44 7700 100002',notes:'New sponsor this year. Very engaged with speaking opportunities.',logoUrl:''},
+    {company:'EventStack',tier:'Gold',pipeline:'confirmed',contractValue:25000,contactName:'Tom Reynolds',contactEmail:'tom@eventstack.io',contactPhone:'+44 7700 100003',notes:'Tech partner — wants prominent digital presence.',logoUrl:''},
+    {company:'Insight Events',tier:'Gold',pipeline:'fulfilled',contractValue:25000,contactName:'Carlos Mendez',contactEmail:'carlos@insight.events',contactPhone:'+44 7700 100004',notes:'All deliverables fulfilled early.',logoUrl:''},
+    {company:'Pixel & Co',tier:'Silver',pipeline:'confirmed',contractValue:12500,contactName:'Kenji Watanabe',contactEmail:'kenji@pixelco.design',contactPhone:'+44 7700 100005',notes:'Design company — wants logo in prominent positions.',logoUrl:''},
+    {company:'GreenEvent Group',tier:'Silver',pipeline:'confirmed',contractValue:12500,contactName:'Leila Hassan',contactEmail:'leila@greenevent.eu',contactPhone:'+44 7700 100006',notes:'Sustainability sponsor — must be featured in green initiatives section.',logoUrl:''},
+    {company:'Crowdsafe',tier:'Silver',pipeline:'negotiating',contractValue:12500,contactName:'Luke Patterson',contactEmail:'luke@crowdsafe.com',contactPhone:'+44 7700 100007',notes:'Contract not yet signed. Follow up by end of month.',logoUrl:''},
+    {company:'Ticketwise',tier:'Bronze',pipeline:'confirmed',contractValue:5000,contactName:'Oliver Crane',contactEmail:'oliver@ticketwise.io',contactPhone:'+44 7700 100008',notes:'First-time sponsor.',logoUrl:''},
+    {company:'Holostream',tier:'Bronze',pipeline:'confirmed',contractValue:5000,contactName:'Raj Patel',contactEmail:'raj@holostream.com',contactPhone:'+44 7700 100009',notes:'Keen on digital/streaming deliverables.',logoUrl:''},
+    {company:'Eventforce',tier:'Bronze',pipeline:'prospect',contractValue:5000,contactName:'Fatima Al-Rashid',contactEmail:'fatima@eventforce.co',contactPhone:'+44 7700 100010',notes:'Pitched at April networking event.',logoUrl:''},
+    {company:'Events Weekly',tier:'Media Partner',pipeline:'confirmed',contractValue:0,contactName:'David Clarke',contactEmail:'david@eventsweekly.co.uk',contactPhone:'+44 7700 100011',notes:'3 pre-event articles + post-event review agreed.',logoUrl:''},
+    {company:'Sustainable Event News',tier:'Media Partner',pipeline:'confirmed',contractValue:0,contactName:'Zara Ahmed',contactEmail:'zara@senevent.co',contactPhone:'+44 7700 100012',notes:'Focused on sustainability coverage.',logoUrl:''},
+  ];
+
+  DB.sponsors = sponsorData.map((sp, i) => ({
+    ...sp, id: 'sp-'+String(i+1).padStart(3,'0'),
+    createdAt: new Date(Date.now()-(20-i)*86400000).toISOString(),
+    updatedAt: new Date().toISOString()
+  }));
+
+  // Auto-create deliverables from packages for each sponsor
+  DB.deliverables = [];
+  DB.sponsors.forEach(sp => {
+    const pkg = DB.packages.find(p => p.tierName === sp.tier);
+    if (pkg && pkg.deliverables) {
+      pkg.deliverables.forEach(d => {
+        DB.deliverables.push({
+          id: uid(),
+          sponsorId: sp.id,
+          name: d.name,
+          category: d.category,
+          promised: d.qty||1,
+          delivered: 0,
+          dueDate: '',
+          notes: '',
+          rag: 'auto',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
+      });
+    }
+  });
+
+  // Mark some deliverables as delivered (for variety)
+  const fullyDone = ['sp-001','sp-004'];
+  const partiallyDone = ['sp-002','sp-003','sp-005'];
+  DB.deliverables.forEach(d => {
+    if (fullyDone.includes(d.sponsorId)) { d.delivered = d.promised; }
+    else if (partiallyDone.includes(d.sponsorId)) {
+      if (Math.random() > 0.4) d.delivered = d.promised;
+      else if (Math.random() > 0.5) d.delivered = Math.floor(d.promised/2);
+    } else if (['sp-006','sp-007'].includes(d.sponsorId)) {
+      if (Math.random() > 0.6) d.delivered = d.promised;
+    }
+    // Set some due dates
+    if (!d.dueDate && Math.random() > 0.5) {
+      const days = Math.floor(Math.random()*60) - 10;
+      const dt = new Date(Date.now()+days*86400000);
+      d.dueDate = dt.toISOString().slice(0,10);
+    }
+  });
+
+  // Sample payment milestones
+  DB.payments = [
+    // Headline: FutureTech
+    {id:uid(),sponsorId:'sp-001',milestoneName:'deposit',amount:15000,dueDate:'2026-01-15',invoiceRef:'INV-2026-001',paidDate:'2026-01-10',updatedAt:new Date().toISOString(),createdAt:new Date().toISOString()},
+    {id:uid(),sponsorId:'sp-001',milestoneName:'balance',amount:35000,dueDate:'2026-04-01',invoiceRef:'INV-2026-002',paidDate:'2026-03-28',updatedAt:new Date().toISOString(),createdAt:new Date().toISOString()},
+    // Gold: Nexus
+    {id:uid(),sponsorId:'sp-002',milestoneName:'deposit',amount:7500,dueDate:'2026-02-01',invoiceRef:'INV-2026-003',paidDate:'2026-01-30',updatedAt:new Date().toISOString(),createdAt:new Date().toISOString()},
+    {id:uid(),sponsorId:'sp-002',milestoneName:'balance',amount:17500,dueDate:'2026-05-01',invoiceRef:'INV-2026-004',paidDate:'',updatedAt:new Date().toISOString(),createdAt:new Date().toISOString()},
+    // Gold: EventStack
+    {id:uid(),sponsorId:'sp-003',milestoneName:'deposit',amount:7500,dueDate:'2026-02-15',invoiceRef:'INV-2026-005',paidDate:'2026-02-12',updatedAt:new Date().toISOString(),createdAt:new Date().toISOString()},
+    {id:uid(),sponsorId:'sp-003',milestoneName:'balance',amount:17500,dueDate:'2026-03-31',invoiceRef:'INV-2026-006',paidDate:'',updatedAt:new Date().toISOString(),createdAt:new Date().toISOString()},
+    // Gold: Insight (fulfilled)
+    {id:uid(),sponsorId:'sp-004',milestoneName:'deposit',amount:7500,dueDate:'2026-01-20',invoiceRef:'INV-2026-007',paidDate:'2026-01-19',updatedAt:new Date().toISOString(),createdAt:new Date().toISOString()},
+    {id:uid(),sponsorId:'sp-004',milestoneName:'balance',amount:17500,dueDate:'2026-03-15',invoiceRef:'INV-2026-008',paidDate:'2026-03-14',updatedAt:new Date().toISOString(),createdAt:new Date().toISOString()},
+    // Silver: Pixel & Co
+    {id:uid(),sponsorId:'sp-005',milestoneName:'deposit',amount:5000,dueDate:'2026-02-28',invoiceRef:'INV-2026-009',paidDate:'2026-02-25',updatedAt:new Date().toISOString(),createdAt:new Date().toISOString()},
+    {id:uid(),sponsorId:'sp-005',milestoneName:'balance',amount:7500,dueDate:'2026-04-30',invoiceRef:'',paidDate:'',updatedAt:new Date().toISOString(),createdAt:new Date().toISOString()},
+    // Silver: GreenEvent
+    {id:uid(),sponsorId:'sp-006',milestoneName:'deposit',amount:5000,dueDate:'2026-01-31',invoiceRef:'INV-2026-010',paidDate:'2026-01-28',updatedAt:new Date().toISOString(),createdAt:new Date().toISOString()},
+    {id:uid(),sponsorId:'sp-006',milestoneName:'balance',amount:7500,dueDate:'2026-03-20',invoiceRef:'INV-2026-011',paidDate:'',updatedAt:new Date().toISOString(),createdAt:new Date().toISOString()},
+    // Bronze sponsors
+    {id:uid(),sponsorId:'sp-008',milestoneName:'final',amount:5000,dueDate:'2026-03-01',invoiceRef:'INV-2026-012',paidDate:'2026-02-28',updatedAt:new Date().toISOString(),createdAt:new Date().toISOString()},
+    {id:uid(),sponsorId:'sp-009',milestoneName:'final',amount:5000,dueDate:'2026-02-15',invoiceRef:'INV-2026-013',paidDate:'',updatedAt:new Date().toISOString(),createdAt:new Date().toISOString()},
+    // Overdue examples
+    {id:uid(),sponsorId:'sp-007',milestoneName:'deposit',amount:3750,dueDate:'2026-02-01',invoiceRef:'INV-2026-014',paidDate:'',updatedAt:new Date().toISOString(),createdAt:new Date().toISOString()},
+  ];
+
+  save();
+  renderDashboard();
+  alert(`✓ Sample data loaded: ${DB.sponsors.length} sponsors, ${DB.deliverables.length} deliverables, ${DB.payments.length} payment milestones, ${DB.packages.length} package templates`);
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+load();
+renderDashboard();
+updateBadges();
+</script>
+</body>
+</html>
