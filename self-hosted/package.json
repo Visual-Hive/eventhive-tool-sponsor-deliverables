@@ -1,0 +1,17 @@
+{
+  "name": "eventhive-tool-backend",
+  "version": "1.0.0",
+  "description": "Lightweight self-hosted backend for EventHive tools",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "hash-password": "node -e \"import('bcrypt').then(b=>b.default.hash(process.argv[1],10)).then(console.log)\" --"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "express": "^4.21.0",
+    "express-session": "^1.18.0",
+    "pg": "^8.13.0"
+  }
+}

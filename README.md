@@ -82,3 +82,77 @@ PRs welcome! Please read the [Contributing Guide](https://github.com/Visual-Hive
 MIT — free to use, modify, and distribute.
 
 Built by [Visual Hive](https://visualhive.io) as part of the [EventHive](https://eventhive.io) open-source toolkit.
+
+---
+
+## 🐳 Self-Hosting
+
+Run this tool on your own infrastructure using Docker Compose. Your data stays on your servers.
+
+### Prerequisites
+- [Docker Desktop](https://docs.docker.com/get-docker/) (or Docker Engine + Compose V2)
+- ~512 MB RAM
+
+### Quick Start
+
+```bash
+# 1. Clone this repo
+git clone https://github.com/Visual-Hive/eventhive-tool-sponsor-deliverables.git
+cd eventhive-tool-sponsor-deliverables
+
+# 2. Run the setup script — it handles .env creation, optional password, and Docker build
+bash self-hosted/setup.sh
+
+# 3. Open the tool in your browser
+open http://localhost:3000
+```
+
+### Manual Setup (without the script)
+
+```bash
+cd self-hosted
+cp .env.example .env
+# Edit .env to set SESSION_SECRET, optional PASSWORD_HASH, etc.
+docker compose up -d --build
+```
+
+### Setting a Login Password
+
+By default the tool runs in open-access mode (fine for local use).
+To add password protection:
+
+```bash
+cd self-hosted
+npm install
+npm run hash-password yourpassword   # copy the $2b$... hash
+# Paste into .env:  PASSWORD_HASH=<hash>
+docker compose restart app
+```
+
+### Configuration (.env)
+
+| Variable | Default | Description |
+|---|---|---|
+| `PORT` | `3000` | HTTP port |
+| `SESSION_SECRET` | *(required)* | Random string for signing sessions |
+| `PASSWORD_HASH` | *(empty = open)* | bcrypt hash of your access password |
+| `TOOL_TITLE` | `Sponsor Deliverables Tracker` | Title shown inside the tool |
+| `PRIMARY_COLOR` | `#6366f1` | Branding colour (hex) |
+
+### Data Storage
+
+All data is stored in a PostgreSQL database inside the Docker volume `db_data`.
+
+**Backup:**
+```bash
+docker compose -f self-hosted/docker-compose.yml exec db pg_dump -U tool tooldb > backup.sql
+```
+
+**Restore:**
+```bash
+cat backup.sql | docker compose -f self-hosted/docker-compose.yml exec -T db psql -U tool tooldb
+```
+
+---
+
+> This self-hosted backend is API-compatible with [EventHive](https://eventhive.io), so you can migrate your data to the hosted version at any time using the tool's built-in export/import feature.

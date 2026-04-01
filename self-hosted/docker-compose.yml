@@ -1,0 +1,35 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tool
+      POSTGRES_PASSWORD: toolpass
+      POSTGRES_DB: tooldb
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tool -d tooldb"]
+      interval: 5s
+      retries: 10
+
+  app:
+    build:
+      context: ..
+      dockerfile: self-hosted/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      DATABASE_URL: postgres://tool:toolpass@db:5432/tooldb
+      SESSION_SECRET: ${SESSION_SECRET:-change-me-in-production}
+      PASSWORD_HASH: ${PASSWORD_HASH:-}
+      TOOL_TITLE: ${TOOL_TITLE:-Sponsor Deliverables Tracker}
+      PRIMARY_COLOR: ${PRIMARY_COLOR:-#6366f1}
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data:
